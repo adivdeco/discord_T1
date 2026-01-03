@@ -1,0 +1,90 @@
+// components/layout/DMSidebar.jsx
+import { Plus, X } from 'lucide-react';
+
+export const DMSidebar = ({
+    conversations,
+    selectedConversation,
+    onSelect,
+    onOpenDMModal,
+    currentUser,
+    onDelete
+}) => {
+    return (
+        <div className="w-60 bg-[#2f3136] flex flex-col h-full">
+            {/* Search Header */}
+            <div className="h-12 border-b border-[#202225] flex items-center px-4 shadow-sm shrink-0">
+                <button
+                    onClick={onOpenDMModal}
+                    className="bg-[#202225] text-left text-gray-400 text-xs w-full p-1.5 rounded focus:outline-none hover:text-white transition"
+                >
+                    Find or start a conversation...
+                </button>
+            </div>
+
+            {/* List */}
+            <div className="flex-1 overflow-y-auto p-2 space-y-1 custom-scrollbar">
+                <div className="flex items-center justify-between text-xs font-bold text-gray-400 px-2 mb-2 uppercase group">
+                    <span>Direct Messages</span>
+                    <Plus onClick={onOpenDMModal} className="w-3 h-3 cursor-pointer hover:text-white" />
+                </div>
+
+                {conversations.map(conv => {
+                    // Logic: Find the participant that is NOT the current user
+                    // We assume 'participants' is an array of Objects populated by backend
+                    // If it is just IDs, this will fail. ensure backend uses .populate()
+                    const otherUser = conv.participants.find(p => p._id !== currentUser?.id) || conv.participants[0];
+
+                    // Fallback name/image if data is missing
+                    const displayName = otherUser?.firstName || otherUser?.username || "Unknown User";
+                    const displayImage = otherUser?.imageUrl;
+
+                    // console.log("[DEBUG] Conversation:", conv);
+                    // console.log("[DEBUG] Other User:", otherUser);
+                    // console.log("name", displayName);
+                    // console.log("image", displayImage);
+
+
+                    return (
+                        <div
+                            key={conv._id}
+                            onClick={() => onSelect(conv)}
+                            className={`flex items-center px-2 py-2 rounded cursor-pointer group ${selectedConversation?._id === conv._id
+                                ? 'bg-[#393c43] text-white'
+                                : 'text-gray-400 hover:bg-[#34373c] hover:text-gray-100'
+                                }`}
+                        >
+                            <div className="relative mr-3">
+                                <img
+                                    src={displayImage || "https://discord.com/assets/c9006004b97560d2b274.svg"}
+                                    alt="avatar"
+                                    className="w-8 h-8 rounded-full bg-indigo-500 object-cover"
+                                />
+                                <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-[2px] border-[#2f3136]"></div>
+                            </div>
+
+                            <div className="flex-1 truncate">
+                                <div className="font-medium text-sm truncate">
+                                    {displayName}
+                                </div>
+                            </div>
+
+                            <X
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onDelete(conv._id);
+                                }}
+                                className="w-4 h-4 ml-auto hidden group-hover:block hover:text-red-400 text-gray-500"
+                            />
+                        </div>
+                    );
+                })}
+
+                {conversations.length === 0 && (
+                    <div className="text-center text-gray-500 text-xs mt-4">
+                        No conversations yet.<br />Start one by adding friends!
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
