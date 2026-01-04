@@ -21,7 +21,7 @@ exports.syncUser = async (req, res) => {
             { upsert: true, new: true, setDefaultsOnInsert: true }
         );
 
-        console.log(`[SYNC] Synced user: ${username} (${clerkId})`);
+        // console.log(`[SYNC] Synced user: ${username} (${clerkId})`);
         res.status(200).json(user);
     } catch (error) {
         console.error('Error syncing user:', error);

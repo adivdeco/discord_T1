@@ -33,25 +33,25 @@ exports.getUserConversations = async (req, res) => {
 
         // Manually populate participant details
         const populatedConversations = await Promise.all(conversations.map(async (conv) => {
-            console.log(`[DEBUG] Processing conversation ${conv._id} with participants:`, conv.participants);
+            // console.log(`[DEBUG] Processing conversation ${conv._id} with participants:`, conv.participants);
 
             // Check if participants are valid
             if (!conv.participants || conv.participants.length === 0) {
-                console.log(`[DEBUG] No participants found for conversation ${conv._id}`);
+                // console.log(`[DEBUG] No participants found for conversation ${conv._id}`);
                 return conv.toObject();
             }
 
             // Fetch user details for each participant
             const participantsDetails = await User.find({
                 clerkId: { $in: conv.participants }
-            }).select('clerkId username avatar email');
+            }).select('clerkId username avatar email isOnline lastSeen');
 
-            console.log(`[DEBUG] Found ${participantsDetails.length} users for conversation ${conv._id}`);
-            if (participantsDetails.length === 0) {
-                console.log(`[DEBUG] WARNING: No users found matching clerkIds: ${conv.participants.join(', ')}`);
-            } else {
-                participantsDetails.forEach(u => console.log(`[DEBUG] Match: ${u.username} (${u.clerkId})`));
-            }
+            // console.log(`[DEBUG] Found ${participantsDetails.length} users for conversation ${conv._id}`);
+            // if (participantsDetails.length === 0) {
+            //     console.log(`[DEBUG] WARNING: No users found matching clerkIds: ${conv.participants.join(', ')}`);
+            // } else {
+            //     participantsDetails.forEach(u => console.log(`[DEBUG] Match: ${u.username} (${u.clerkId})`));
+            // }
 
             return {
                 ...conv.toObject(),
@@ -59,12 +59,16 @@ exports.getUserConversations = async (req, res) => {
                     _id: user.clerkId, // Frontend uses ._id matching clerkId
                     username: user.username,
                     imageUrl: user.avatar, // Map avatar to imageUrl for frontend consistency
-                    firstName: user.username // Fallback for frontend
+                    username: user.username,
+                    imageUrl: user.avatar, // Map avatar to imageUrl for frontend consistency
+                    firstName: user.username, // Fallback for frontend
+                    isOnline: user.isOnline,
+                    lastSeen: user.lastSeen
                 }))
             };
         }));
 
-        console.log('[DEBUG] Populated Conversations:', JSON.stringify(populatedConversations, null, 2));
+        // console.log('[DEBUG] Populated Conversations:', JSON.stringify(populatedConversations, null, 2));
 
         res.status(200).json(populatedConversations);
     } catch (error) {

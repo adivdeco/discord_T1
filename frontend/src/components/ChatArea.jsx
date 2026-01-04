@@ -1,15 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { useSocket } from '../hooks/useSocket';
 import { Send, Hash, Bell, Pin, Users, Inbox, HelpCircle } from 'lucide-react';
 import { useUser } from '@clerk/clerk-react';
 import { FaDiscord } from "react-icons/fa";
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
-export const ChatArea = ({ channelId, conversationId, channelName = 'general', onStartDM }) => {
+export const ChatArea = ({ channelId, conversationId, channelName = 'general', onStartDM, socket }) => {
     const { user } = useUser();
-    const { socket } = useSocket(channelId || conversationId);
+    // Socket is now passed as a prop
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState('');
     const [activeProfile, setActiveProfile] = useState(null);
@@ -171,8 +170,8 @@ export const ChatArea = ({ channelId, conversationId, channelName = 'general', o
                                     {/* The Bubble */}
                                     <div
                                         className={`px-4 py-2.5 rounded-2xl text-sm md:text-[15px] leading-relaxed whitespace-pre-wrap shadow-md break-words max-w-full ${isCurrentUser
-                                                ? 'bg-[#5865F2] text-white rounded-tr-none'  // Discord Blurple for Me
-                                                : 'bg-[#2f3136] text-gray-100 rounded-tl-none' // Dark Gray for Others
+                                            ? 'bg-[#5865F2] text-white rounded-tr-none'  // Discord Blurple for Me
+                                            : 'bg-[#2f3136] text-gray-100 rounded-tl-none' // Dark Gray for Others
                                             }`}
                                     >
                                         {msg.content}

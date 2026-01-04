@@ -3,6 +3,7 @@ const http = require('http');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const { Server } = require('socket.io');
+const User = require('./models/User');
 require('dotenv').config();
 
 const app = express();
@@ -73,16 +74,34 @@ app.get('/api/users/:userId/conversations', conversationController.getUserConver
 app.delete('/api/conversations/:conversationId', conversationController.deleteConversation);
 
 // -------- Socket.io Events --------
-io.on('connection', (socket) => {
-    console.log('✅ User connected:', socket.id);
+io.on('connection', async (socket) => {
+    const userId = socket.handshake.query.userId;
+    console.log('✅ User connected:', socket.id, 'UserID:', userId);
+
+    if (userId) {
+        try {
+            await User.findOneAndUpdate({ clerkId: userId }, { isOnline: true });
+            socket.broadcast.emit('user_status_change', { userId, isOnline: true });
+        } catch (err) {
+            console.error('Error updating user status:', err);
+        }
+    }
 
     socket.on('join_channel', (channelId) => {
         socket.join(channelId);
         console.log(`👤 User ${socket.id} joined channel ${channelId}`);
     });
 
-    socket.on('disconnect', () => {
+    socket.on('disconnect', async () => {
         console.log('❌ User disconnected:', socket.id);
+        if (userId) {
+            try {
+                await User.findOneAndUpdate({ clerkId: userId }, { isOnline: false, lastSeen: new Date() });
+                socket.broadcast.emit('user_status_change', { userId, isOnline: false, lastSeen: new Date() });
+            } catch (err) {
+                console.error('Error updating user status on disconnect:', err);
+            }
+        }
     });
 });
 

@@ -1,5 +1,6 @@
 // components/layout/DMSidebar.jsx
 import { Plus, X } from 'lucide-react';
+import { formatDiscordTime } from '../../utils/dateUtils';
 
 export const DMSidebar = ({
     conversations,
@@ -9,6 +10,7 @@ export const DMSidebar = ({
     currentUser,
     onDelete
 }) => {
+
     return (
         <div className="w-60 bg-[#2f3136] flex flex-col h-full">
             {/* Search Header */}
@@ -59,12 +61,22 @@ export const DMSidebar = ({
                                     alt="avatar"
                                     className="w-8 h-8 rounded-full bg-indigo-500 object-cover"
                                 />
-                                <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-[2px] border-[#2f3136]"></div>
+                                {otherUser?.isOnline ? (
+                                    <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-[2px] border-[#2f3136]" title="Online"></div>
+                                ) : (
+                                    <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-gray-500 rounded-full border-[2px] border-[#2f3136]" title="Offline"></div>
+                                )}
                             </div>
 
                             <div className="flex-1 truncate">
                                 <div className="font-medium text-sm truncate">
                                     {displayName}
+                                </div>
+                                <div className="text-xs text-gray-500">
+                                    {otherUser?.isOnline
+                                        ? "Online"
+                                        : formatDiscordTime(otherUser?.lastSeen)
+                                    }
                                 </div>
                             </div>
 

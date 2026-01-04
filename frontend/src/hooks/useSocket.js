@@ -1,14 +1,18 @@
 import { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 
-const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002';
 
-export const useSocket = (channelId) => {
+export const useSocket = (channelId, userId) => {
     const [socket, setSocket] = useState(null);
     const [isConnected, setIsConnected] = useState(false);
 
     useEffect(() => {
-        const socketInstance = io(SOCKET_URL);
+        if (!userId) return;
+
+        const socketInstance = io(SOCKET_URL, {
+            query: { userId }
+        });
 
         socketInstance.on('connect', () => {
             setIsConnected(true);
@@ -25,7 +29,7 @@ export const useSocket = (channelId) => {
         return () => {
             socketInstance.disconnect();
         };
-    }, []);
+    }, [userId]);
 
     useEffect(() => {
         if (socket && channelId) {

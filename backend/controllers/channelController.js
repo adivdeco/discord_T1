@@ -4,7 +4,7 @@ const Server = require('../models/Server');
 exports.createChannel = async (req, res) => {
     try {
         const { name, type, category, serverId, userId } = req.body;
-        console.log('Creating channel with:', { name, type, category, serverId, userId });
+        // console.log('Creating channel with:', { name, type, category, serverId, userId });
 
         // Permission Check
         const server = await Server.findById(serverId);
