@@ -3,10 +3,11 @@ import axios from 'axios';
 import { Send, Hash, Bell, Pin, Users, Inbox, HelpCircle } from 'lucide-react';
 import { useUser } from '@clerk/clerk-react';
 import { FaDiscord } from "react-icons/fa";
+import SearchBar from './SearchBar';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
-export const ChatArea = ({ channelId, conversationId, channelName = 'general', onStartDM, socket }) => {
+export const ChatArea = ({ channelId, conversationId, channelName = 'general', serverId, onStartDM, socket }) => {
     const { user } = useUser();
     // Socket is now passed as a prop
     const [messages, setMessages] = useState([]);
@@ -75,6 +76,7 @@ export const ChatArea = ({ channelId, conversationId, channelName = 'general', o
 
         if (channelId) messageData.channelId = channelId;
         if (conversationId) messageData.conversationId = conversationId;
+        if (serverId) messageData.serverId = serverId;
 
         try {
             await axios.post(`${API_URL}/api/messages`, messageData);
@@ -98,11 +100,7 @@ export const ChatArea = ({ channelId, conversationId, channelName = 'general', o
                     <Pin className="w-5 h-5 cursor-pointer hover:text-gray-200" />
                     <Users className="w-5 h-5 cursor-pointer hover:text-gray-200" />
                     <div className="relative hidden md:block">
-                        <input
-                            type="text"
-                            placeholder="Search"
-                            className="bg-[#202225] text-sm px-2 py-1 rounded transition-all w-36 focus:w-60 text-white outline-none"
-                        />
+                        <SearchBar serverId={serverId} />
                     </div>
                     <Inbox className="w-5 h-5 cursor-pointer hover:text-gray-200" />
                     <HelpCircle className="w-5 h-5 cursor-pointer hover:text-gray-200" />

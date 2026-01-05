@@ -251,6 +251,7 @@ export const Layout = () => {
                         <ChatArea
                             channelId={selectedChannel._id}
                             channelName={selectedChannel.name}
+                            serverId={selectedServer._id}
                             onStartDM={handleStartDM}
                             socket={socket}
                         />
