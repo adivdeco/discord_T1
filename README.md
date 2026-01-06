@@ -19,6 +19,7 @@
    MONGODB_URI=your_mongodb_uri
    PORT=5000
    CLERK_SECRET_KEY=your_clerk_secret_key
+   GEMINI_API_KEY=key
    ```
 
 4. Start the server:
