@@ -13,10 +13,13 @@ const sendMessage = async (req, res) => {
 
         // Generate embedding for the message content
         let vector = [];
-        try {
-            vector = await getEmbedding(content);
-        } catch (embeddingError) {
-            console.error("Embedding generation failed:", embeddingError);
+
+        if (channelId) {
+            try {
+                vector = await getEmbedding(content);
+            } catch (embeddingError) {
+                console.error("Embedding generation failed:", embeddingError);
+            }
         }
 
         const newMessage = new Message({
@@ -32,17 +35,20 @@ const sendMessage = async (req, res) => {
 
         await newMessage.save();
 
+
+
         // Socket.io emission
         if (req.io) {
-            if (channelId) {
-                req.io.to(channelId).emit('new_message', newMessage);
+            if (channelId || conversationId) {
+                req.io.to(channelId || conversationId).emit('new_message', newMessage);
             }
         }
 
         // Update conversation last message if it's a DM
         if (conversationId) {
             await Conversation.findByIdAndUpdate(conversationId, {
-                lastMessage: content,
+                lastMessage: newMessage._id,
+
                 lastMessageAt: Date.now()
             });
         }
