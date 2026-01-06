@@ -4,7 +4,7 @@ import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
-const SearchBar = ({ serverId }) => {
+const SearchBar = ({ serverId, onStartDM, onChannelSelect }) => {
     const [query, setQuery] = useState('');
     const [results, setResults] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -47,6 +47,16 @@ const SearchBar = ({ serverId }) => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
+    const handleResultClick = (result) => {
+        if (result.type === 'user') {
+            if (onStartDM) onStartDM(result.clerkId);
+        } else if (result.type === 'message') {
+            if (onChannelSelect) onChannelSelect(result.channelId, result._id);
+        }
+        setIsOpen(false);
+        setQuery('');
+    };
+
     return (
         <div className="relative w-64" ref={searchRef}>
             <div className="relative">
@@ -54,7 +64,7 @@ const SearchBar = ({ serverId }) => {
                     type="text"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
-                    placeholder="Search server messages..."
+                    placeholder="Search users or messages..."
                     className="w-full bg-[#1e1f22] text-sm text-gray-200 rounded px-2 py-1 pl-2 pr-8 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all placeholder-gray-400"
                 />
                 <div className="absolute right-2 top-1.5 text-gray-400">
@@ -71,26 +81,43 @@ const SearchBar = ({ serverId }) => {
                     <div className="p-2 text-xs font-semibold text-gray-400 uppercase">
                         Search Results
                     </div>
-                    {results.map((msg) => (
-                        <div key={msg._id} className="p-2 hover:bg-[#35373c] cursor-pointer group transition-colors rounded mx-1">
-                            <div className="flex items-center justify-between mb-1">
-                                <div className="flex items-center gap-2">
-                                    {msg.senderAvatar ? (
-                                        <img src={msg.senderAvatar} alt="" className="w-5 h-5 rounded-full" />
-                                    ) : (
-                                        <div className="w-5 h-5 rounded-full bg-gray-500 flex items-center justify-center text-[10px] text-white">
-                                            {msg.senderName?.[0]}
-                                        </div>
-                                    )}
-                                    <span className="font-medium text-gray-200 text-sm">{msg.senderName}</span>
+                    {results.map((result) => (
+                        <div
+                            key={result._id}
+                            onClick={() => handleResultClick(result)}
+                            className="p-2 hover:bg-[#35373c] cursor-pointer group transition-colors rounded mx-1"
+                        >
+                            {result.type === 'user' ? (
+                                <div className="flex items-center gap-3">
+                                    <img src={result.avatar} alt={result.username} className="w-8 h-8 rounded-full" />
+                                    <div>
+                                        <div className="font-medium text-gray-200 text-sm">{result.username}</div>
+                                        {/* <div className="text-xs text-gray-400">{result.email}</div> */}
+                                    </div>
+                                    <span className="ml-auto text-[10px] text-gray-500 bg-[#1e1f22] px-1 rounded uppercase">USER</span>
                                 </div>
-                                <span className="text-[10px] text-gray-500 bg-[#1e1f22] px-1 rounded">
-                                    #{msg.channelName}
-                                </span>
-                            </div>
-                            <div className="text-gray-300 text-sm pl-7 line-clamp-2">
-                                {msg.content}
-                            </div>
+                            ) : (
+                                <>
+                                    <div className="flex items-center justify-between mb-1">
+                                        <div className="flex items-center gap-2">
+                                            {result.senderAvatar ? (
+                                                <img src={result.senderAvatar} alt="" className="w-5 h-5 rounded-full" />
+                                            ) : (
+                                                <div className="w-5 h-5 rounded-full bg-gray-500 flex items-center justify-center text-[10px] text-white">
+                                                    {result.senderName?.[0]}
+                                                </div>
+                                            )}
+                                            <span className="font-medium text-gray-200 text-sm">{result.senderName}</span>
+                                        </div>
+                                        <span className="text-[10px] text-gray-500 bg-[#1e1f22] px-1 rounded">
+                                            #{result.channelName}
+                                        </span>
+                                    </div>
+                                    <div className="text-gray-300 text-sm pl-7 line-clamp-2">
+                                        {result.content}
+                                    </div>
+                                </>
+                            )}
                         </div>
                     ))}
                 </div>

@@ -7,13 +7,14 @@ import SearchBar from './SearchBar';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
-export const ChatArea = ({ channelId, conversationId, channelName = 'general', serverId, onStartDM, socket }) => {
+export const ChatArea = ({ channelId, conversationId, channelName = 'general', serverId, targetMessageId, onStartDM, onChannelSelect, socket }) => {
     const { user } = useUser();
     // Socket is now passed as a prop
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState('');
     const [activeProfile, setActiveProfile] = useState(null);
     const messagesEndRef = useRef(null);
+    const [justJumped, setJustJumped] = useState(false);
 
     // Fetch initial messages
     useEffect(() => {
@@ -57,10 +58,26 @@ export const ChatArea = ({ channelId, conversationId, channelName = 'general', s
         };
     }, [socket, user]);
 
-    // Auto scroll
+    // Scroll Logic
     useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, [messages]);
+        if (targetMessageId && messages.length > 0) {
+            const el = document.getElementById(targetMessageId);
+            if (el) {
+                el.scrollIntoView({ behavior: "smooth", block: "center" });
+                el.classList.add('bg-gray-700/50', 'transition-colors', 'duration-1000');
+                setTimeout(() => el.classList.remove('bg-gray-700/50'), 2000);
+                setJustJumped(true);
+            }
+        } else if (!justJumped) {
+            // Defaults to bottom if not jumping
+            messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        }
+    }, [messages, targetMessageId]);
+
+    // Reset jump flag when channel changes
+    useEffect(() => {
+        setJustJumped(false);
+    }, [channelId, conversationId]);
 
     const handleSendMessage = async (e) => {
         e.preventDefault();
@@ -87,9 +104,9 @@ export const ChatArea = ({ channelId, conversationId, channelName = 'general', s
     };
 
     return (
-        <div className="flex flex-col h-full bg-[#36393f] flex-1">
+        <div className="flex flex-col h-full bg-black/60 flex-1">
             {/* Header */}
-            <div className="h-12 border-b border-[#202225] flex items-center px-4 justify-between shadow-sm bg-[#36393f] z-10">
+            <div className="h-12 border-b border-[#202225] flex items-center px-4 justify-between shadow-sm bg-black/60 z-10">
                 <div className="flex items-center text-white font-bold">
                     <Hash className="w-5 h-5 text-gray-400 mr-2" />
                     {channelName}
@@ -100,7 +117,11 @@ export const ChatArea = ({ channelId, conversationId, channelName = 'general', s
                     <Pin className="w-5 h-5 cursor-pointer hover:text-gray-200" />
                     <Users className="w-5 h-5 cursor-pointer hover:text-gray-200" />
                     <div className="relative hidden md:block">
-                        <SearchBar serverId={serverId} />
+                        <SearchBar
+                            serverId={serverId}
+                            onStartDM={onStartDM}
+                            onChannelSelect={onChannelSelect}
+                        />
                     </div>
                     <Inbox className="w-5 h-5 cursor-pointer hover:text-gray-200" />
                     <HelpCircle className="w-5 h-5 cursor-pointer hover:text-gray-200" />
@@ -124,8 +145,8 @@ export const ChatArea = ({ channelId, conversationId, channelName = 'general', s
                     return (
                         <div
                             key={i}
-
-                            className={`flex w-full ${isCurrentUser ? 'justify-end' : 'justify-start'}`}
+                            id={msg._id} // ID for scroll target
+                            className={`flex w-full ${isCurrentUser ? 'justify-end' : 'justify-start'} rounded px-2`} // Added padding and rounded for highlight effect
                         >
                             <div
                                 className={`flex max-w-[80%] md:max-w-[70%] gap-3
@@ -224,8 +245,8 @@ export const ChatArea = ({ channelId, conversationId, channelName = 'general', s
             )}
 
             {/* Input Area */}
-            <div className="p-4 bg-[#36393f] flex-shrink-0">
-                <form onSubmit={handleSendMessage} className="bg-[#40444b] rounded-lg p-2 flex items-center shadow-sm relative">
+            <div className="px-3 py-1 bg-black/8 flex-shrink-0">
+                <form onSubmit={handleSendMessage} className="bg-black/60 border border-[0.01px] border-gray-700 rounded-lg p-3 flex items-center shadow-sm relative">
                     <button type="button" className="text-gray-400 hover:text-gray-200 mr-3 bg-gray-600 rounded-full p-1 h-6 w-6 flex items-center justify-center shrink-0">
                         <span className="font-bold text-xs pb-0.5">+</span>
                     </button>
@@ -234,7 +255,7 @@ export const ChatArea = ({ channelId, conversationId, channelName = 'general', s
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
                         placeholder={`Message # ${channelName}`}
-                        className="bg-transparent flex-1 text-white outline-none placeholder-gray-500 text-sm md:text-base py-1"
+                        className="bg-transparent flex-1 text-white  outline-none placeholder-gray-500 text-sm md:text-base py-1"
                     />
                     <div className="flex items-center space-x-3 ml-2 text-gray-400 shrink-0">
                         <Send className={`w-5 h-5 cursor-pointer transition-colors ${input.trim() ? 'text-[#5865F2]' : 'hover:text-white'}`} onClick={handleSendMessage} />

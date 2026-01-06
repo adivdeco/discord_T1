@@ -1,5 +1,6 @@
 const Message = require('../models/Message');
 const Conversation = require('../models/Conversation');
+const User = require('../models/User');
 const { getEmbedding } = require('../services/aiService');
 const mongoose = require('mongoose');
 
@@ -97,7 +98,8 @@ const searchMessages = async (req, res) => {
 
         const queryVector = await getEmbedding(query);
 
-        const results = await Message.aggregate([
+        // 1. Message Search (Vector)
+        const messagePromise = Message.aggregate([
             {
                 "$vectorSearch": {
                     "index": "vector_index",
@@ -136,6 +138,23 @@ const searchMessages = async (req, res) => {
                 }
             }
         ]);
+
+        // 2. User Search (Regex) - Global search for now
+        const userPromise = User.find({
+            $or: [
+                { username: { $regex: query, $options: 'i' } },
+                { email: { $regex: query, $options: 'i' } }
+            ]
+        }).limit(5).select('username avatar _id isOnline email clerkId');
+
+        // Execute both
+        const [messages, users] = await Promise.all([messagePromise, userPromise]);
+
+        // Combine and Tag
+        const results = [
+            ...users.map(u => ({ ...u.toObject(), type: 'user' })),
+            ...messages.map(m => ({ ...m, type: 'message' }))
+        ];
 
         res.json(results);
 

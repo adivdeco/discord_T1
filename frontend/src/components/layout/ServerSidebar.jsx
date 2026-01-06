@@ -30,10 +30,10 @@ export const ServerSidebar = ({
     const sortedCategories = [...definedCategories, ...otherCategories];
 
     return (
-        <div className="w-60 bg-[#2f3136] flex flex-col h-full">
+        <div className="w-60 bg-black/50 border-r border-[#36393f] border-r-[0.01px] flex flex-col h-full">
             {/* Server Header Dropdown */}
             <div
-                className="h-12 border-b border-[#202225] flex items-center px-4 font-bold text-white hover:bg-[#34373c] cursor-pointer transition-colors shadow-sm justify-between relative shrink-0"
+                className="h-12 border-b border-[#36393f] border-b-[1px] flex items-center px-4 font-bold text-white hover:bg-[#34373c] cursor-pointer transition-colors shadow-sm justify-between relative shrink-0"
                 onClick={() => setShowDropdown(!showDropdown)}
             >
                 <span className="truncate">{server.name}</span>
