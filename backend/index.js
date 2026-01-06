@@ -6,6 +6,12 @@ const { Server } = require('socket.io');
 const User = require('./models/User');
 require('dotenv').config();
 
+// AI Notification Imports
+const NotificationScheduler = require('./services/NotificationScheduler');
+const ReminderScheduler = require('./services/ReminderScheduler');
+const notificationRoutes = require('./routes/notificationRoutes');
+const summaryReminderRoutes = require('./routes/summaryReminderRoutes');
+
 const app = express();
 const server = http.createServer(app);
 
@@ -73,6 +79,12 @@ app.post('/api/conversations', conversationController.getOrCreateConversation);
 app.get('/api/users/:userId/conversations', conversationController.getUserConversations);
 app.delete('/api/conversations/:conversationId', conversationController.deleteConversation);
 
+// -------- Notification Routes (AI-Powered) --------
+app.use('/api/notifications', notificationRoutes);
+
+// -------- Summary & Reminder Routes --------
+app.use('/api/summary-reminder', summaryReminderRoutes);
+
 // -------- Socket.io Events --------
 io.on('connection', async (socket) => {
     const userId = socket.handshake.query.userId;
@@ -107,6 +119,10 @@ io.on('connection', async (socket) => {
 
 const PORT = process.env.PORT || 5001;
 
+// -------- AI Schedulers --------
+let notificationScheduler = null;
+let reminderScheduler = null;
+
 const connectDB = async () => {
     try {
         await mongoose.connect(process.env.MONGODB_URI);
@@ -120,5 +136,35 @@ const connectDB = async () => {
 connectDB().then(() => {
     server.listen(PORT, () => {
         console.log(`🚀 Server running on port ${PORT}`);
+        
+        // Initialize AI Notification Scheduler
+        try {
+            notificationScheduler = new NotificationScheduler();
+            notificationScheduler.initialize();
+            console.log('🤖 AI Notification Scheduler initialized');
+        } catch (error) {
+            console.error('⚠️ Error initializing notification scheduler:', error.message);
+            console.log('💡 Make sure GEMINI_API_KEY is set in .env file');
+        }
+
+        // Initialize Reminder Scheduler
+        try {
+            reminderScheduler = new ReminderScheduler();
+            reminderScheduler.initialize();
+            console.log('🔔 Reminder Scheduler initialized');
+        } catch (error) {
+            console.error('⚠️ Error initializing reminder scheduler:', error.message);
+        }
     });
+});
+
+// Graceful shutdown
+process.on('SIGINT', () => {
+    if (notificationScheduler) {
+        notificationScheduler.stop();
+    }
+    if (reminderScheduler) {
+        reminderScheduler.stop();
+    }
+    process.exit(0);
 });

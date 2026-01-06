@@ -1,17 +1,19 @@
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { Send, Hash, Bell, Pin, Users, Inbox, HelpCircle } from 'lucide-react';
+import { Send, Hash, Bell, Pin, Users, Inbox, HelpCircle, MessageSquare } from 'lucide-react';
 import { useUser } from '@clerk/clerk-react';
 import { FaDiscord } from "react-icons/fa";
+import { SummaryModal } from './SummaryModal';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
-export const ChatArea = ({ channelId, conversationId, channelName = 'general', onStartDM, socket }) => {
+export const ChatArea = ({ channelId, conversationId, channelName = 'general', onStartDM, socket, serverId }) => {
     const { user } = useUser();
     // Socket is now passed as a prop
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState('');
     const [activeProfile, setActiveProfile] = useState(null);
+    const [summaryModalOpen, setSummaryModalOpen] = useState(false);
     const messagesEndRef = useRef(null);
 
     // Fetch initial messages
@@ -97,6 +99,15 @@ export const ChatArea = ({ channelId, conversationId, channelName = 'general', o
                     <Bell className="w-5 h-5 cursor-pointer hover:text-gray-200" />
                     <Pin className="w-5 h-5 cursor-pointer hover:text-gray-200" />
                     <Users className="w-5 h-5 cursor-pointer hover:text-gray-200" />
+                    {channelId && serverId && (
+                        <button
+                            onClick={() => setSummaryModalOpen(true)}
+                            title="Generate chat summary"
+                            className="w-5 h-5 cursor-pointer hover:text-gray-200 transition flex items-center justify-center"
+                        >
+                            <MessageSquare className="w-5 h-5" />
+                        </button>
+                    )}
                     <div className="relative hidden md:block">
                         <input
                             type="text"
@@ -243,6 +254,15 @@ export const ChatArea = ({ channelId, conversationId, channelName = 'general', o
                     </div>
                 </form>
             </div>
+
+            {/* Summary Modal */}
+            <SummaryModal
+                isOpen={summaryModalOpen}
+                onClose={() => setSummaryModalOpen(false)}
+                channelId={channelId}
+                serverId={serverId}
+                userId={user?.id}
+            />
         </div>
     );
 };
