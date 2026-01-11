@@ -4,8 +4,8 @@ import { Mic, Headphones, Settings } from 'lucide-react';
 
 export const UserPanel = ({ user }) => {
     return (
-        <div className="bg-[#292b2f] h-[52px] flex items-center px-2 space-x-2 shrink-0 w-full mt-auto">
-            <div className="hover:bg-white/10 p-1 rounded cursor-pointer pl-0">
+        <div className="bg-black/30 backdrop-blur-md border-t border-white/5 h-[52px] flex items-center px-2 space-x-2 shrink-0 w-full mt-auto">
+            <div className="hover:bg-white/10 p-1 rounded cursor-pointer pl-0 transition-colors">
                 <UserButton />
             </div>
             <div className="flex-1 min-w-0">
@@ -17,9 +17,9 @@ export const UserPanel = ({ user }) => {
                 </div>
             </div>
             <div className="flex items-center">
-                <div className="p-1.5 hover:bg-white/10 rounded cursor-pointer"><Mic className="w-4 h-4 text-white" /></div>
-                <div className="p-1.5 hover:bg-white/10 rounded cursor-pointer"><Headphones className="w-4 h-4 text-white" /></div>
-                <div className="p-1.5 hover:bg-white/10 rounded cursor-pointer"><Settings className="w-4 h-4 text-white" /></div>
+                <div className="p-1.5 hover:bg-white/10 rounded cursor-pointer transition-colors"><Mic className="w-4 h-4 text-gray-300 hover:text-white" /></div>
+                <div className="p-1.5 hover:bg-white/10 rounded cursor-pointer transition-colors"><Headphones className="w-4 h-4 text-gray-300 hover:text-white" /></div>
+                <div className="p-1.5 hover:bg-white/10 rounded cursor-pointer transition-colors"><Settings className="w-4 h-4 text-gray-300 hover:text-white" /></div>
             </div>
         </div>
     );

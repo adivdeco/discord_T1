@@ -202,7 +202,7 @@ export const Layout = () => {
     const isOwner = selectedServer && user && selectedServer.owner === user.id;
     // console.log(user)
     return (
-        <div className="flex h-screen w-screen overflow-hidden text-sm font-sans">
+        <div className="flex h-screen w-screen overflow-hidden text-sm font-sans bg-gradient-to-br from-[#0f1012] via-[#202225] to-[#0b0c0e] text-gray-100">
 
             {/* 1. Navigation Rail (Left) */}
             <NavigationRail
@@ -214,7 +214,7 @@ export const Layout = () => {
             />
 
             {/* 2. Sidebar (Middle) - Toggles between Server and DM */}
-            <div className="flex flex-col bg-[#36393f] h-full">
+            <div className="flex flex-col h-full bg-transparent">
                 {selectedServer ? (
                     <ServerSidebar
                         server={selectedServer}
@@ -249,7 +249,7 @@ export const Layout = () => {
             </div>
 
             {/* 3. Main Chat Area (Right) */}
-            <div className="flex-1 flex flex-col min-w-0 bg-[#36393f]">
+            <div className="flex-1 flex flex-col min-w-0 bg-transparent">
                 {selectedServer ? (
                     selectedChannel ? (
                         <ChatArea

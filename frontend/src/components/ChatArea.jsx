@@ -104,18 +104,18 @@ export const ChatArea = ({ channelId, conversationId, channelName = 'general', s
     };
 
     return (
-        <div className="flex flex-col h-full bg-black/60 flex-1">
+        <div className="flex flex-col h-full bg-black/40 flex-1 backdrop-blur-[2px]">
             {/* Header */}
-            <div className="h-12 border-b border-[#202225] flex items-center px-4 justify-between shadow-sm bg-black/60 z-10">
+            <div className="h-12 border-b border-white/5 flex items-center px-4 justify-between shadow-sm bg-black/40 backdrop-blur-md z-10">
                 <div className="flex items-center text-white font-bold">
                     <Hash className="w-5 h-5 text-gray-400 mr-2" />
                     {channelName}
                 </div>
 
                 <div className="flex items-center space-x-4 text-gray-400">
-                    <Bell className="w-5 h-5 cursor-pointer hover:text-gray-200" />
-                    <Pin className="w-5 h-5 cursor-pointer hover:text-gray-200" />
-                    <Users className="w-5 h-5 cursor-pointer hover:text-gray-200" />
+                    <Bell className="w-5 h-5 cursor-pointer hover:text-gray-200 transition-colors" />
+                    <Pin className="w-5 h-5 cursor-pointer hover:text-gray-200 transition-colors" />
+                    <Users className="w-5 h-5 cursor-pointer hover:text-gray-200 transition-colors" />
                     <div className="relative hidden md:block">
                         <SearchBar
                             serverId={serverId}
@@ -123,8 +123,8 @@ export const ChatArea = ({ channelId, conversationId, channelName = 'general', s
                             onChannelSelect={onChannelSelect}
                         />
                     </div>
-                    <Inbox className="w-5 h-5 cursor-pointer hover:text-gray-200" />
-                    <HelpCircle className="w-5 h-5 cursor-pointer hover:text-gray-200" />
+                    <Inbox className="w-5 h-5 cursor-pointer hover:text-gray-200 transition-colors" />
+                    <HelpCircle className="w-5 h-5 cursor-pointer hover:text-gray-200 transition-colors" />
                 </div>
             </div>
 
@@ -132,7 +132,7 @@ export const ChatArea = ({ channelId, conversationId, channelName = 'general', s
             <div className="flex-1 overflow-y-auto p-4 space-y-6 custom-scrollbar">
                 {messages.length === 0 && (
                     <div className="text-gray-500 text-center mt-10">
-                        <Hash className="w-12 h-12 mx-auto mb-2 bg-[#2f3136] p-2 rounded-full" />
+                        <Hash className="w-12 h-12 mx-auto mb-2 bg-white/5 p-2 rounded-full" />
                         <p>Welcome to #{channelName}!</p>
                         <p className="text-sm">This is the start of the #{channelName} channel.</p>
                     </div>
@@ -157,7 +157,7 @@ export const ChatArea = ({ channelId, conversationId, channelName = 'general', s
                                 <img
                                     src={msg?.senderAvatar}
                                     alt="avatar"
-                                    className="w-10 h-10 rounded-full hover:opacity-80 cursor-pointer flex-shrink-0 mt-1 shadow-sm"
+                                    className="w-10 h-10 rounded-full hover:opacity-80 cursor-pointer flex-shrink-0 mt-1 shadow-sm border border-white/10"
                                     onClick={(e) => {
                                         const rect = e.target.getBoundingClientRect();
                                         // Adjust popover position based on side
@@ -189,8 +189,8 @@ export const ChatArea = ({ channelId, conversationId, channelName = 'general', s
                                     {/* The Bubble */}
                                     <div
                                         className={`px-4 py-2.5 rounded-2xl text-sm md:text-[15px] leading-relaxed whitespace-pre-wrap shadow-md break-words max-w-full ${isCurrentUser
-                                            ? 'bg-[#5865F2] text-white rounded-tr-none'  // Discord Blurple for Me
-                                            : 'bg-[#2f3136] text-gray-100 rounded-tl-none' // Dark Gray for Others
+                                            ? 'bg-[#5865F2] text-white rounded-tr-none shadow-indigo-500/20'  // Discord Blurple for Me
+                                            : 'bg-black/40 border border-white/5 backdrop-blur-sm text-gray-100 rounded-tl-none' // Glass for Others
                                             }`}
                                     >
                                         {msg.content}
@@ -213,7 +213,7 @@ export const ChatArea = ({ channelId, conversationId, channelName = 'general', s
                         onClick={() => setActiveProfile(null)}
                     ></div>
                     <div
-                        className="fixed z-50 bg-[#18191c] rounded-lg shadow-2xl w-72 overflow-hidden border border-[#202225] animate-in fade-in zoom-in-95 duration-100"
+                        className="fixed z-50 bg-[#18191c] rounded-lg shadow-2xl w-72 overflow-hidden border border-white/10 animate-in fade-in zoom-in-95 duration-100"
                         style={{ left: activeProfile.x, top: Math.min(activeProfile.y, window.innerHeight - 300) }}
                     >
                         <div className="h-20 bg-[#5865F2] relative">
@@ -226,7 +226,7 @@ export const ChatArea = ({ channelId, conversationId, channelName = 'general', s
                             <div className="font-bold text-white text-xl">{activeProfile.user.senderName}</div>
                             <div className="text-gray-400 text-sm mb-4">#{activeProfile.user.senderId?.slice(-4)}</div>
 
-                            <div className="border-t border-[#2f3136] my-3"></div>
+                            <div className="border-t border-white/10 my-3"></div>
 
                             <div className="uppercase text-xs font-bold text-gray-400 mb-2">Note</div>
                             <input
@@ -245,9 +245,9 @@ export const ChatArea = ({ channelId, conversationId, channelName = 'general', s
             )}
 
             {/* Input Area */}
-            <div className="px-3 py-1 bg-black/8 flex-shrink-0">
-                <form onSubmit={handleSendMessage} className="bg-black/60 border border-[0.01px] border-gray-700 rounded-lg p-3 flex items-center shadow-sm relative">
-                    <button type="button" className="text-gray-400 hover:text-gray-200 mr-3 bg-gray-600 rounded-full p-1 h-6 w-6 flex items-center justify-center shrink-0">
+            <div className="px-3 py-1 bg-transparent flex-shrink-0">
+                <form onSubmit={handleSendMessage} className="bg-black/50 backdrop-blur-sm border border-white/10 rounded-lg p-3 flex items-center shadow-lg relative transition-colors focus-within:border-white/20">
+                    <button type="button" className="text-gray-400 hover:text-gray-200 mr-3 bg-white/10 rounded-full p-1 h-6 w-6 flex items-center justify-center shrink-0 transition-colors">
                         <span className="font-bold text-xs pb-0.5">+</span>
                     </button>
                     <input
