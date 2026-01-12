@@ -12,12 +12,12 @@ export const DMSidebar = ({
 }) => {
 
     return (
-        <div className="w-60 bg-black/20 backdrop-blur-sm flex flex-col h-full border-r border-white/5">
+        <div className="w-60 bg-white/5 backdrop-blur-2xl flex flex-col h-full border-r border-white/10">
             {/* Search Header */}
-            <div className="h-12 border-b border-white/5 flex items-center px-4 shadow-sm shrink-0">
+            <div className="h-12 border-b border-white/10 flex items-center px-4 shadow-sm shrink-0">
                 <button
                     onClick={onOpenDMModal}
-                    className="bg-black/40 text-left text-gray-400 text-xs w-full p-1.5 rounded focus:outline-none hover:bg-black/60 hover:text-white transition-all shadow-inner"
+                    className="bg-black/20 text-left text-gray-300 text-xs w-full p-1.5 rounded-md focus:outline-none hover:bg-black/40 hover:text-white transition-all shadow-inner border border-white/5"
                 >
                     Find or start a conversation...
                 </button>
@@ -50,16 +50,16 @@ export const DMSidebar = ({
                         <div
                             key={conv._id}
                             onClick={() => onSelect(conv)}
-                            className={`flex items-center px-2 py-2 rounded cursor-pointer group transition-all ${selectedConversation?._id === conv._id
-                                ? 'bg-white/10 text-white shadow-md'
-                                : 'text-gray-400 hover:bg-white/5 hover:text-gray-100'
+                            className={`flex items-center px-2 py-2 rounded-lg cursor-pointer group transition-all border border-transparent ${selectedConversation?._id === conv._id
+                                ? 'bg-white/10 text-white shadow-lg border-white/5 backdrop-blur-md'
+                                : 'text-gray-400 hover:bg-white/5 hover:text-gray-100 hover:border-white/5'
                                 }`}
                         >
                             <div className="relative mr-3">
                                 <img
                                     src={displayImage || "https://discord.com/assets/c9006004b97560d2b274.svg"}
                                     alt="avatar"
-                                    className="w-8 h-8 rounded-full bg-indigo-500 object-cover shadow-sm"
+                                    className="w-8 h-8 rounded-full bg-indigo-500 object-cover shadow-sm ring-2 ring-transparent group-hover:ring-white/10 transition-all"
                                     onError={(e) => { e.target.src = "https://discord.com/assets/c9006004b97560d2b274.svg" }}
                                 />
                                 {otherUser?.isOnline ? (

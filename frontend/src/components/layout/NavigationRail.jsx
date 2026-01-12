@@ -10,11 +10,11 @@ export const NavigationRail = ({
     onOpenJoinModal
 }) => {
     return (
-        <div className="w-[72px] bg-black/40 backdrop-blur-md flex flex-col items-center py-3 space-y-2 overflow-y-auto no-scrollbar scroll-smooth shrink-0 border-r border-white/5">
+        <div className="w-[72px] bg-white/5 backdrop-blur-2xl flex flex-col items-center py-4 space-y-2 overflow-y-auto no-scrollbar scroll-smooth shrink-0 border-r border-white/10 z-20">
             {/* Home Button */}
             <div
                 onClick={() => onSelectServer(null)}
-                className={`w-12 h-12 rounded-[24px] hover:rounded-[16px] transition-all flex items-center justify-center cursor-pointer mb-2 group shadow-lg
+                className={`w-12 h-12 rounded-[24px] hover:rounded-[16px] transition-all flex items-center justify-center cursor-pointer mb-2 group shadow-xl relative
                 ${!selectedServer ? 'bg-[#5865F2] rounded-[16px]' : 'bg-white/10 hover:bg-[#5865F2]'}`}
             >
                 <FaDiscord className="w-7 h-7 text-white" />
@@ -27,7 +27,7 @@ export const NavigationRail = ({
                 <div
                     key={server._id}
                     onClick={() => onSelectServer(server)}
-                    className={`group relative w-12 h-12 rounded-[24px] hover:rounded-[16px] transition-all cursor-pointer flex items-center justify-center font-bold overflow-hidden text-gray-200 shadow-lg
+                    className={`group relative w-12 h-12 rounded-[24px] hover:rounded-[16px] transition-all cursor-pointer flex items-center justify-center font-bold overflow-hidden text-gray-200 shadow-lg border border-transparent hover:border-white/10
                     ${selectedServer?._id === server._id ? 'bg-[#5865F2] rounded-[16px] text-white' : 'bg-white/10 hover:bg-[#5865F2] hover:text-white'}`}
                 >
                     <span className={`absolute left-0 top-0 bottom-0 w-1 bg-white rounded-r-lg transform transition-all my-auto h-2 

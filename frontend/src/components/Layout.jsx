@@ -16,6 +16,7 @@ import { JoinServerModal } from './JoinServerModal';
 import { InviteModal } from './InviteModal';
 import { ServerSettingsModal } from './ServerSettingsModal';
 import { CreateDMModal } from './CreateDMModal';
+import { UserSettingsModal } from './UserSettingsModal';
 
 import { useSocket } from '../hooks/useSocket';
 
@@ -30,6 +31,9 @@ export const Layout = () => {
 
     // State for Search Navigation
     const [targetMessageId, setTargetMessageId] = useState(null);
+
+    // Theme Color State
+    const [themeColor, setThemeColor] = useState('#5865F2');
 
     // Channel State
     const [channels, setChannels] = useState([]);
@@ -49,11 +53,21 @@ export const Layout = () => {
         channel: false,
         invite: false,
         settings: false,
-        dm: false
+        dm: false,
+        userSettings: false
     });
 
     // Helper to toggle modals
     const toggleModal = (key, value) => setModals(prev => ({ ...prev, [key]: value }));
+
+    // Apply Theme Color
+    useEffect(() => {
+        if (themeColor) {
+            document.documentElement.style.setProperty('--glass-primary', themeColor);
+            // Optionally set secondary colors derived from primary
+            // document.documentElement.style.setProperty('--glass-secondary', themeColor); 
+        }
+    }, [themeColor]);
 
     // --- DATA FETCHING ---
 
@@ -61,16 +75,18 @@ export const Layout = () => {
     useEffect(() => {
         if (!user) return;
 
-        // Sync User to Backend
+        // Sync User to Backend & Get Theme Preference
         axios.post(`${API_URL}/api/users/sync`, {
             clerkId: user.id,
             username: user.username || user.firstName,
             email: user.primaryEmailAddress?.emailAddress,
             avatar: user.imageUrl
-        }).then(res =>
-            console.log('User Synced:', res.data,
-            ))
-            .catch(err => console.error('Failed to sync user:', err));
+        }).then(res => {
+            console.log('User Synced:', res.data);
+            if (res.data.themeColor) {
+                setThemeColor(res.data.themeColor);
+            }
+        }).catch(err => console.error('Failed to sync user:', err));
 
         axios.get(`${API_URL}/api/users/${user.id}/servers`)
             .then(res => {
@@ -202,7 +218,7 @@ export const Layout = () => {
     const isOwner = selectedServer && user && selectedServer.owner === user.id;
     // console.log(user)
     return (
-        <div className="flex h-screen w-screen overflow-hidden text-sm font-sans bg-gradient-to-br from-[#0f1012] via-[#202225] to-[#0b0c0e] text-gray-100">
+        <div className="flex h-screen w-screen overflow-hidden text-sm font-sans bg-black/30 backdrop-blur-sm text-gray-100">
 
             {/* 1. Navigation Rail (Left) */}
             <NavigationRail
@@ -245,7 +261,7 @@ export const Layout = () => {
                 )}
 
                 {/* User Panel (Bottom) */}
-                <UserPanel user={user} />
+                <UserPanel user={user} onOpenSettings={() => toggleModal('userSettings', true)} />
             </div>
 
             {/* 3. Main Chat Area (Right) */}
@@ -299,6 +315,7 @@ export const Layout = () => {
             {modals.invite && selectedServer && <InviteModal server={selectedServer} onClose={() => toggleModal('invite', false)} />}
             {modals.settings && selectedServer && <ServerSettingsModal server={selectedServer} onClose={() => toggleModal('settings', false)} onServerUpdated={(u) => { setServers(servers.map(s => s._id === u._id ? u : s)); setSelectedServer(u); }} />}
             {modals.dm && <CreateDMModal onClose={() => toggleModal('dm', false)} onConversationCreated={(c) => { setConversations([c, ...conversations]); setSelectedConversation(c); setSelectedServer(null); }} />}
+            {modals.userSettings && <UserSettingsModal onClose={() => toggleModal('userSettings', false)} currentThemeColor={themeColor} onThemeChange={setThemeColor} />}
 
         </div >
     );

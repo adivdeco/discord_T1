@@ -104,9 +104,9 @@ export const ChatArea = ({ channelId, conversationId, channelName = 'general', s
     };
 
     return (
-        <div className="flex flex-col h-full bg-black/40 flex-1 backdrop-blur-[2px]">
+        <div className="flex flex-col h-full bg-black/20 flex-1 backdrop-blur-sm">
             {/* Header */}
-            <div className="h-12 border-b border-white/5 flex items-center px-4 justify-between shadow-sm bg-black/40 backdrop-blur-md z-10">
+            <div className="h-12 border-b border-white/10 flex items-center px-4 justify-between shadow-sm bg-white/5 backdrop-blur-xl z-10">
                 <div className="flex items-center text-white font-bold">
                     <Hash className="w-5 h-5 text-gray-400 mr-2" />
                     {channelName}
@@ -188,9 +188,9 @@ export const ChatArea = ({ channelId, conversationId, channelName = 'general', s
 
                                     {/* The Bubble */}
                                     <div
-                                        className={`px-4 py-2.5 rounded-2xl text-sm md:text-[15px] leading-relaxed whitespace-pre-wrap shadow-md break-words max-w-full ${isCurrentUser
+                                        className={`px-4 py-2.5 rounded-2xl text-sm md:text-[15px] leading-relaxed whitespace-pre-wrap shadow-md break-words max-w-full border border-white/5 ${isCurrentUser
                                             ? 'bg-[#5865F2] text-white rounded-tr-none shadow-indigo-500/20'  // Discord Blurple for Me
-                                            : 'bg-black/40 border border-white/5 backdrop-blur-sm text-gray-100 rounded-tl-none' // Glass for Others
+                                            : 'bg-black/40 backdrop-blur-md text-gray-100 rounded-tl-none' // Glass for Others
                                             }`}
                                     >
                                         {msg.content}
@@ -213,7 +213,7 @@ export const ChatArea = ({ channelId, conversationId, channelName = 'general', s
                         onClick={() => setActiveProfile(null)}
                     ></div>
                     <div
-                        className="fixed z-50 bg-[#18191c] rounded-lg shadow-2xl w-72 overflow-hidden border border-white/10 animate-in fade-in zoom-in-95 duration-100"
+                        className="fixed z-50 bg-[#18191c]/90 backdrop-blur-xl rounded-2xl shadow-2xl w-72 overflow-hidden border border-white/10 animate-in fade-in zoom-in-95 duration-100"
                         style={{ left: activeProfile.x, top: Math.min(activeProfile.y, window.innerHeight - 300) }}
                     >
                         <div className="h-20 bg-[#5865F2] relative">
@@ -222,7 +222,7 @@ export const ChatArea = ({ channelId, conversationId, channelName = 'general', s
                                 className="w-20 h-20 rounded-full border-[6px] border-[#18191c] absolute -bottom-10 left-4 bg-[#18191c]"
                             />
                         </div>
-                        <div className="pt-12 p-4 bg-[#18191c]">
+                        <div className="pt-12 p-4">
                             <div className="font-bold text-white text-xl">{activeProfile.user.senderName}</div>
                             <div className="text-gray-400 text-sm mb-4">#{activeProfile.user.senderId?.slice(-4)}</div>
 
@@ -231,7 +231,7 @@ export const ChatArea = ({ channelId, conversationId, channelName = 'general', s
                             <div className="uppercase text-xs font-bold text-gray-400 mb-2">Note</div>
                             <input
                                 placeholder={`Message @${activeProfile.user.senderName}`}
-                                className="w-full bg-[#202225] text-gray-200 text-sm p-2 rounded mb-2 border-none focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                className="w-full bg-black/20 text-gray-200 text-sm p-2 rounded-lg mb-2 border border-white/5 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all"
                                 onKeyDown={(e) => {
                                     if (e.key === 'Enter') {
                                         onStartDM && onStartDM(activeProfile.user.senderId);
@@ -246,7 +246,7 @@ export const ChatArea = ({ channelId, conversationId, channelName = 'general', s
 
             {/* Input Area */}
             <div className="px-3 py-1 bg-transparent flex-shrink-0">
-                <form onSubmit={handleSendMessage} className="bg-black/50 backdrop-blur-sm border border-white/10 rounded-lg p-3 flex items-center shadow-lg relative transition-colors focus-within:border-white/20">
+                <form onSubmit={handleSendMessage} className="bg-black/30 backdrop-blur-md border border-white/10 rounded-2xl p-3 flex items-center shadow-lg relative transition-colors focus-within:border-white/20 focus-within:bg-black/40">
                     <button type="button" className="text-gray-400 hover:text-gray-200 mr-3 bg-white/10 rounded-full p-1 h-6 w-6 flex items-center justify-center shrink-0 transition-colors">
                         <span className="font-bold text-xs pb-0.5">+</span>
                     </button>
