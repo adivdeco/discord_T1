@@ -121,12 +121,3 @@ export const ModerationIndicator = ({ moderation, compact = false }) => {
 
   return null;
 };
-
-          <p className="text-xs">Analyzed - {type}</p>
-        </div>
-      </div>
-    );
-  }
-
-  return null;
-};
