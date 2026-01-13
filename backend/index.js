@@ -54,6 +54,7 @@ app.get('/', (req, res) => {
 
 // User Routes
 app.post('/api/users/sync', userController.syncUser);
+app.put('/api/users/:userId/preferences', userController.updatePreferences);
 
 // Server Routes
 app.post('/api/servers', serverController.createServer);

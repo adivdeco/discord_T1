@@ -7,6 +7,14 @@ body,
 #root {
   height: 100%;
   overflow: hidden;
-  background-color: #202225;
+  /* Deep, vibrant mesh-like gradient background for glassmorphism to shine over */
+  background: radial-gradient(circle at 0% 0%, var(--glass-primary, #2e1065) 0%, #000000 50%),
+    radial-gradient(circle at 100% 0%, var(--glass-secondary, #0c4a6e) 0%, #000000 50%),
+    radial-gradient(circle at 100% 100%, var(--glass-accent, #4c0519) 0%, #000000 50%),
+    radial-gradient(circle at 0% 100%, var(--glass-primary, #1e1b4b) 0%, #000000 50%);
+  background-color: #000000;
+  /* Fallback */
   color: #dcddde;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
