@@ -31,7 +31,7 @@ export const Layout = () => {
 
     // State for Search Navigation
     const [targetMessageId, setTargetMessageId] = useState(null);
-const [themeColor, setThemeColor] = useState('#5865F2');
+    const [themeColor, setThemeColor] = useState('#5865F2');
     // Channel State
     const [channels, setChannels] = useState([]);
     const [selectedChannel, setSelectedChannel] = useState(null);
@@ -100,7 +100,7 @@ const [themeColor, setThemeColor] = useState('#5865F2');
             setSelectedChannel(null);
             return;
         }
-        
+
         axios.get(`${API_URL}/api/servers/${selectedServer._id}/channels`)
             .then(res => {
                 setChannels(res.data);
@@ -181,7 +181,7 @@ const [themeColor, setThemeColor] = useState('#5865F2');
             await axios.delete(`${API_URL}/api/channels/${id}`, { data: { userId: user.id } });
             setChannels(channels.filter(c => c._id !== id));
             if (selectedChannel?._id === id) setSelectedChannel(null);
-        } catch (err) { alert("Error deleting channel",err); }
+        } catch (err) { alert("Error deleting channel", err); }
     };
 
     const handleStartDM = async (targetUserId) => {

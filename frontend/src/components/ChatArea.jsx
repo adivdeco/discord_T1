@@ -4,7 +4,7 @@ import { Send, Hash, Bell, Pin, Users, Inbox, HelpCircle, MessageSquare } from '
 import { useUser } from '@clerk/clerk-react';
 import { FaDiscord } from "react-icons/fa";
 import { SummaryModal } from './SummaryModal';
-import { MessageReactions } from './MessageReactions';
+import MessageReactions from './MessageReactions';
 import SearchBar from './SearchBar';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
