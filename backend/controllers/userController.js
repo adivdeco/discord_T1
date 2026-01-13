@@ -27,4 +27,24 @@ exports.syncUser = async (req, res) => {
         console.error('Error syncing user:', error);
         res.status(500).json({ error: 'Failed to sync user' });
     }
+}
+
+exports.updatePreferences = async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const { themeColor } = req.body;
+
+        const user = await User.findOneAndUpdate(
+            { clerkId: userId },
+            { themeColor },
+            { new: true }
+        );
+
+        if (!user) return res.status(404).json({ error: 'User not found' });
+
+        res.status(200).json(user);
+    } catch (error) {
+        console.error('Error updating preferences:', error);
+        res.status(500).json({ error: 'Failed to update preferences' });
+    }
 };
