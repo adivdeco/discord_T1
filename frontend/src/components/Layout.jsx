@@ -279,6 +279,7 @@ const [themeColor, setThemeColor] = useState('#5865F2');
                                     setTargetMessageId(messageId);
                                 }
                             }}
+                            targetMessageId={targetMessageId}
                             socket={socket}
                         />
                     ) : (
