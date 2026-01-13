@@ -2,6 +2,7 @@ const Message = require('../models/Message');
 const Conversation = require('../models/Conversation');
 const User = require('../models/User');
 const { getEmbedding } = require('../services/aiService');
+const AutoModService = require('../services/AutoModService');
 const mongoose = require('mongoose');
 
 const sendMessage = async (req, res) => {
@@ -10,6 +11,36 @@ const sendMessage = async (req, res) => {
 
         if (!content || (!channelId && !conversationId) || !senderId || !senderName) {
             return res.status(400).json({ message: "Missing required fields" });
+        }
+
+        // Run AutoMod AI analysis
+        let moderationResult = null;
+        let shouldBlock = false;
+
+        try {
+            const channelContext = channelId ? "Server Channel" : "Direct Message";
+            moderationResult = await AutoModService.analyzeMessage(
+                content,
+                senderName,
+                channelContext,
+                [],
+                serverId
+            );
+
+            if (moderationResult.action === 'block' && moderationResult.confidence > 0.7) {
+                shouldBlock = true;
+            }
+        } catch (modError) {
+            console.error("AutoMod error (non-fatal):", modError);
+        }
+
+        // If blocked, return error before creating message
+        if (shouldBlock) {
+            return res.status(403).json({
+                message: AutoModService.getActionMessage('block'),
+                blocked: true,
+                moderation: moderationResult
+            });
         }
 
         // Generate embedding for the message content
@@ -31,12 +62,25 @@ const sendMessage = async (req, res) => {
             channel: channelId || undefined,
             server: serverId || undefined, // Save server ID
             conversation: conversationId || undefined,
-            embedding: vector
+            embedding: vector,
+            moderation: {
+                analyzed: true,
+                ...(moderationResult || {}),
+                analyzedAt: new Date()
+            }
         });
 
         await newMessage.save();
 
-
+        // Log moderation action if needed
+        if (moderationResult && moderationResult.action !== 'allow') {
+            await AutoModService.processModerationAction(
+                moderationResult.action,
+                newMessage._id,
+                { content, channelId, conversationId },
+                senderId
+            );
+        }
 
         // Socket.io emission
         if (req.io) {
@@ -49,13 +93,19 @@ const sendMessage = async (req, res) => {
         if (conversationId) {
             await Conversation.findByIdAndUpdate(conversationId, {
                 lastMessage: newMessage._id,
-
                 updatedAt: Date.now()
             });
         }
 
-
-        res.status(201).json(newMessage);
+        res.status(201).json({
+            ...newMessage.toObject(),
+            moderation: {
+                action: newMessage.moderation.action,
+                severity: newMessage.moderation.severity,
+                reason: newMessage.moderation.reason,
+                ...(newMessage.moderation.shouldWarn && { warning: AutoModService.getActionMessage('warn') })
+            }
+        });
     } catch (err) {
         console.error("Error sending message:", err);
         res.status(500).json({ message: "Error sending message" });
