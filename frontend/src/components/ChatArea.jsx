@@ -4,6 +4,7 @@ import { Send, Hash, Bell, Pin, Users, Inbox, HelpCircle, MessageSquare } from '
 import { useUser } from '@clerk/clerk-react';
 import { FaDiscord } from "react-icons/fa";
 import { SummaryModal } from './SummaryModal';
+import { MessageReactions } from './MessageReactions';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
@@ -204,6 +205,16 @@ export const ChatArea = ({ channelId, conversationId, channelName = 'general', o
                                             }`}
                                     >
                                         {msg.content}
+                                    </div>
+
+                                    {/* Reactions */}
+                                    <div className="mt-1">
+                                        <MessageReactions
+                                            messageId={msg._id}
+                                            userId={user?.id}
+                                            userName={user?.firstName || user?.username}
+                                            socket={socket}
+                                        />
                                     </div>
 
                                 </div>
