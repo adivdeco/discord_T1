@@ -1,18 +1,19 @@
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { Send, Hash, Bell, Pin, Users, Inbox, HelpCircle } from 'lucide-react';
+import { Send, Hash, Bell, Pin, Users, Inbox, HelpCircle, MessageSquare } from 'lucide-react';
 import { useUser } from '@clerk/clerk-react';
 import { FaDiscord } from "react-icons/fa";
-import SearchBar from './SearchBar';
+import { SummaryModal } from './SummaryModal';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
-export const ChatArea = ({ channelId, conversationId, channelName = 'general', serverId, targetMessageId, onStartDM, onChannelSelect, socket }) => {
+export const ChatArea = ({ channelId, conversationId, channelName = 'general', onStartDM, socket, serverId }) => {
     const { user } = useUser();
     // Socket is now passed as a prop
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState('');
     const [activeProfile, setActiveProfile] = useState(null);
+    const [summaryModalOpen, setSummaryModalOpen] = useState(false);
     const messagesEndRef = useRef(null);
     const [justJumped, setJustJumped] = useState(false);
 
@@ -113,9 +114,18 @@ export const ChatArea = ({ channelId, conversationId, channelName = 'general', s
                 </div>
 
                 <div className="flex items-center space-x-4 text-gray-400">
-                    <Bell className="w-5 h-5 cursor-pointer hover:text-gray-200 transition-colors" />
-                    <Pin className="w-5 h-5 cursor-pointer hover:text-gray-200 transition-colors" />
-                    <Users className="w-5 h-5 cursor-pointer hover:text-gray-200 transition-colors" />
+                    <Bell className="w-5 h-5 cursor-pointer hover:text-gray-200" />
+                    <Pin className="w-5 h-5 cursor-pointer hover:text-gray-200" />
+                    <Users className="w-5 h-5 cursor-pointer hover:text-gray-200" />
+                    {channelId && serverId && (
+                        <button
+                            onClick={() => setSummaryModalOpen(true)}
+                            title="Generate chat summary"
+                            className="w-5 h-5 cursor-pointer hover:text-gray-200 transition flex items-center justify-center"
+                        >
+                            <MessageSquare className="w-5 h-5" />
+                        </button>
+                    )}
                     <div className="relative hidden md:block">
                         <SearchBar
                             serverId={serverId}
@@ -262,6 +272,15 @@ export const ChatArea = ({ channelId, conversationId, channelName = 'general', s
                     </div>
                 </form>
             </div>
+
+            {/* Summary Modal */}
+            <SummaryModal
+                isOpen={summaryModalOpen}
+                onClose={() => setSummaryModalOpen(false)}
+                channelId={channelId}
+                serverId={serverId}
+                userId={user?.id}
+            />
         </div>
     );
 };

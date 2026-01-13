@@ -256,7 +256,6 @@ export const Layout = () => {
                             channelId={selectedChannel._id}
                             channelName={selectedChannel.name}
                             serverId={selectedServer._id}
-                            targetMessageId={targetMessageId}
                             onStartDM={handleStartDM}
                             onChannelSelect={(channelId, messageId) => {
                                 const ch = channels.find(c => c._id === channelId);
@@ -276,6 +275,7 @@ export const Layout = () => {
                     selectedConversation ? (
                         <ChatArea
                             conversationId={selectedConversation._id}
+                            serverId={selectedConversation._id}
                             channelName={(() => {
                                 // Calculate name safely
                                 const other = selectedConversation.participants?.find(p => p._id !== user.id || p !== user.id);
