@@ -1,58 +1,167 @@
 const Message = require('../models/Message');
+const Conversation = require('../models/Conversation');
+const User = require('../models/User');
+const { getEmbedding } = require('../services/aiService');
+const mongoose = require('mongoose');
 
-// Send a message
-exports.sendMessage = async (req, res) => {
+const sendMessage = async (req, res) => {
     try {
-        const { content, senderId, senderName, senderAvatar, channelId, conversationId } = req.body;
+        const { content, channelId, conversationId, senderId, senderName, senderAvatar, serverId } = req.body;
 
-        // Create new message
+        if (!content || (!channelId && !conversationId) || !senderId || !senderName) {
+            return res.status(400).json({ message: "Missing required fields" });
+        }
+
+        // Generate embedding for the message content
+        let vector = [];
+
+        if (channelId) {
+            try {
+                vector = await getEmbedding(content);
+            } catch (embeddingError) {
+                console.error("Embedding generation failed:", embeddingError);
+            }
+        }
+
         const newMessage = new Message({
             content,
             senderId,
             senderName,
             senderAvatar,
-            channel: channelId,
-            conversation: conversationId
+            channel: channelId || undefined,
+            server: serverId || undefined, // Save server ID
+            conversation: conversationId || undefined,
+            embedding: vector
         });
 
-        const savedMessage = await newMessage.save();
+        await newMessage.save();
 
-        // Emit socket event
+
+
+        // Socket.io emission
         if (req.io) {
-            if (channelId) {
-                req.io.to(channelId).emit('new_message', savedMessage);
-            } else if (conversationId) {
-                req.io.to(conversationId).emit('new_message', savedMessage);
+            if (channelId || conversationId) {
+                req.io.to(channelId || conversationId).emit('new_message', newMessage);
             }
         }
 
-        res.status(201).json(savedMessage);
-    } catch (error) {
-        console.error('Error sending message:', error);
-        res.status(500).json({ error: 'Failed to send message' });
+        // Update conversation last message if it's a DM
+        if (conversationId) {
+            await Conversation.findByIdAndUpdate(conversationId, {
+                lastMessage: newMessage._id,
+
+                updatedAt: Date.now()
+            });
+        }
+
+
+        res.status(201).json(newMessage);
+    } catch (err) {
+        console.error("Error sending message:", err);
+        res.status(500).json({ message: "Error sending message" });
     }
 };
 
-// Get messages for a channel
-exports.getMessages = async (req, res) => {
+const getMessages = async (req, res) => {
     try {
         const { channelId } = req.params;
+        if (!channelId) return res.status(400).json({ message: "Channel ID required" });
+
         const messages = await Message.find({ channel: channelId }).sort({ createdAt: 1 });
         res.status(200).json(messages);
-    } catch (error) {
-        console.error('Error fetching messages:', error);
-        res.status(500).json({ error: 'Failed to fetch messages' });
+    } catch (err) {
+        console.error("Error fetching messages:", err);
+        res.status(500).json({ message: "Error fetching messages" });
     }
 };
 
-// Get messages for a conversation
-exports.getConversationMessages = async (req, res) => {
+const getConversationMessages = async (req, res) => {
     try {
         const { conversationId } = req.params;
+        if (!conversationId) return res.status(400).json({ message: "Conversation ID required" });
+
         const messages = await Message.find({ conversation: conversationId }).sort({ createdAt: 1 });
         res.status(200).json(messages);
+    } catch (err) {
+        console.error("Error fetching conversation messages:", err);
+        res.status(500).json({ message: "Error fetching messages" });
+    }
+}
+
+const searchMessages = async (req, res) => {
+    try {
+        const { query, serverId } = req.query;
+
+        if (!query || !serverId) {
+            return res.status(400).json({ error: "Query and Server ID are required" });
+        }
+
+        const queryVector = await getEmbedding(query);
+
+        // 1. Message Search (Vector)
+        const messagePromise = Message.aggregate([
+            {
+                "$vectorSearch": {
+                    "index": "vector_index",
+                    "path": "embedding",
+                    "queryVector": queryVector,
+                    "numCandidates": 100,
+                    "limit": 10,
+                    "filter": {
+                        "server": {
+                            "$eq": new mongoose.Types.ObjectId(serverId)
+                        }
+                    }
+                }
+            },
+            {
+                "$lookup": {
+                    from: "channels",
+                    localField: "channel",
+                    foreignField: "_id",
+                    as: "channelInfo"
+                }
+            },
+            {
+                "$unwind": "$channelInfo"
+            },
+            {
+                "$project": {
+                    _id: 1,
+                    content: 1,
+                    senderName: 1,
+                    senderAvatar: 1,
+                    createdAt: 1,
+                    channelName: "$channelInfo.name",
+                    channelId: "$channelInfo._id",
+                    score: { $meta: "vectorSearchScore" }
+                }
+            }
+        ]);
+
+        // 2. User Search (Regex) - Global search for now
+        const userPromise = User.find({
+            $or: [
+                { username: { $regex: query, $options: 'i' } },
+                { email: { $regex: query, $options: 'i' } }
+            ]
+        }).limit(5).select('username avatar _id isOnline email clerkId');
+
+        // Execute both
+        const [messages, users] = await Promise.all([messagePromise, userPromise]);
+
+        // Combine and Tag
+        const results = [
+            ...users.map(u => ({ ...u.toObject(), type: 'user' })),
+            ...messages.map(m => ({ ...m, type: 'message' }))
+        ];
+
+        res.json(results);
+
     } catch (error) {
-        console.error('Error fetching conversation messages:', error);
-        res.status(500).json({ error: 'Failed to fetch messages' });
+        console.error("Search Error:", error);
+        res.status(500).json({ error: "Internal Server Error" });
     }
 };
+
+module.exports = { sendMessage, getMessages, getConversationMessages, searchMessages };
