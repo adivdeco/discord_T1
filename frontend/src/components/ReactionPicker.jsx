@@ -5,7 +5,7 @@ import { Smile, X } from 'lucide-react';
  * ReactionPicker Component
  * Shows emoji selector for reacting to messages
  */
-export const ReactionPicker = ({ messageId, onReactionAdd, onClose, isOpen }) => {
+export const ReactionPicker = ({ onReactionAdd, onClose, isOpen }) => {
   const [searchTerm, setSearchTerm] = useState('');
 
   // Popular Discord reactions
