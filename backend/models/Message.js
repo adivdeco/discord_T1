@@ -6,8 +6,15 @@ const messageSchema = new mongoose.Schema({
     senderName: { type: String, required: true }, // Cache username for display
     senderAvatar: { type: String }, // Cache avatar for display
     channel: { type: mongoose.Schema.Types.ObjectId, ref: 'Channel' }, // Optional if conversation
+    server: { type: mongoose.Schema.Types.ObjectId, ref: 'Server' },   // Server ID for search scope
     conversation: { type: mongoose.Schema.Types.ObjectId, ref: 'Conversation' }, // Optional if channel
-    createdAt: { type: Date, default: Date.now }
+    createdAt: { type: Date, default: Date.now },
+    embedding: {
+        type: [Number], // An array of numbers (floats)
+        index: true     // Essential for performance
+    }
+
+
 });
 
 module.exports = mongoose.model('Message', messageSchema);

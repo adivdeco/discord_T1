@@ -73,6 +73,7 @@ app.delete('/api/channels/:channelId', channelController.deleteChannel);
 app.post('/api/messages', messageController.sendMessage);
 app.get('/api/channels/:channelId/messages', messageController.getMessages);
 app.get('/api/conversations/:conversationId/messages', messageController.getConversationMessages);
+app.get('/api/search', messageController.searchMessages);
 
 // Conversation Routes
 app.post('/api/conversations', conversationController.getOrCreateConversation);

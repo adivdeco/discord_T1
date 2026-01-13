@@ -28,6 +28,9 @@ export const Layout = () => {
     const [servers, setServers] = useState([]);
     const [selectedServer, setSelectedServer] = useState(null);
 
+    // State for Search Navigation
+    const [targetMessageId, setTargetMessageId] = useState(null);
+
     // Channel State
     const [channels, setChannels] = useState([]);
     const [selectedChannel, setSelectedChannel] = useState(null);
@@ -76,8 +79,6 @@ export const Layout = () => {
             })
             .catch(err => console.error("Failed to fetch servers", err));
     }, [user]);
-
-
 
     // 2. Fetch Channels (when server changes)
     useEffect(() => {
@@ -201,7 +202,7 @@ export const Layout = () => {
     const isOwner = selectedServer && user && selectedServer.owner === user.id;
     // console.log(user)
     return (
-        <div className="flex h-screen w-screen overflow-hidden text-sm font-sans">
+        <div className="flex h-screen w-screen overflow-hidden text-sm font-sans bg-gradient-to-br from-[#0f1012] via-[#202225] to-[#0b0c0e] text-gray-100">
 
             {/* 1. Navigation Rail (Left) */}
             <NavigationRail
@@ -213,13 +214,16 @@ export const Layout = () => {
             />
 
             {/* 2. Sidebar (Middle) - Toggles between Server and DM */}
-            <div className="flex flex-col bg-[#2f3136] h-full">
+            <div className="flex flex-col h-full bg-transparent">
                 {selectedServer ? (
                     <ServerSidebar
                         server={selectedServer}
                         channels={channels}
                         selectedChannel={selectedChannel}
-                        onSelectChannel={setSelectedChannel}
+                        onSelectChannel={(channel) => {
+                            setSelectedChannel(channel);
+                            setTargetMessageId(null);
+                        }}
                         user={user}
                         isOwner={isOwner}
                         onOpenInvite={() => toggleModal('invite', true)}
@@ -245,7 +249,7 @@ export const Layout = () => {
             </div>
 
             {/* 3. Main Chat Area (Right) */}
-            <div className="flex-1 flex flex-col min-w-0 bg-[#36393f]">
+            <div className="flex-1 flex flex-col min-w-0 bg-transparent">
                 {selectedServer ? (
                     selectedChannel ? (
                         <ChatArea
@@ -253,6 +257,13 @@ export const Layout = () => {
                             channelName={selectedChannel.name}
                             serverId={selectedServer._id}
                             onStartDM={handleStartDM}
+                            onChannelSelect={(channelId, messageId) => {
+                                const ch = channels.find(c => c._id === channelId);
+                                if (ch) {
+                                    setSelectedChannel(ch);
+                                    setTargetMessageId(messageId);
+                                }
+                            }}
                             socket={socket}
                         />
                     ) : (
@@ -289,6 +300,6 @@ export const Layout = () => {
             {modals.settings && selectedServer && <ServerSettingsModal server={selectedServer} onClose={() => toggleModal('settings', false)} onServerUpdated={(u) => { setServers(servers.map(s => s._id === u._id ? u : s)); setSelectedServer(u); }} />}
             {modals.dm && <CreateDMModal onClose={() => toggleModal('dm', false)} onConversationCreated={(c) => { setConversations([c, ...conversations]); setSelectedConversation(c); setSelectedServer(null); }} />}
 
-        </div>
+        </div >
     );
 };

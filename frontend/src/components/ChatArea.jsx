@@ -15,6 +15,7 @@ export const ChatArea = ({ channelId, conversationId, channelName = 'general', o
     const [activeProfile, setActiveProfile] = useState(null);
     const [summaryModalOpen, setSummaryModalOpen] = useState(false);
     const messagesEndRef = useRef(null);
+    const [justJumped, setJustJumped] = useState(false);
 
     // Fetch initial messages
     useEffect(() => {
@@ -58,10 +59,26 @@ export const ChatArea = ({ channelId, conversationId, channelName = 'general', o
         };
     }, [socket, user]);
 
-    // Auto scroll
+    // Scroll Logic
     useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, [messages]);
+        if (targetMessageId && messages.length > 0) {
+            const el = document.getElementById(targetMessageId);
+            if (el) {
+                el.scrollIntoView({ behavior: "smooth", block: "center" });
+                el.classList.add('bg-gray-700/50', 'transition-colors', 'duration-1000');
+                setTimeout(() => el.classList.remove('bg-gray-700/50'), 2000);
+                setJustJumped(true);
+            }
+        } else if (!justJumped) {
+            // Defaults to bottom if not jumping
+            messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        }
+    }, [messages, targetMessageId]);
+
+    // Reset jump flag when channel changes
+    useEffect(() => {
+        setJustJumped(false);
+    }, [channelId, conversationId]);
 
     const handleSendMessage = async (e) => {
         e.preventDefault();
@@ -77,6 +94,7 @@ export const ChatArea = ({ channelId, conversationId, channelName = 'general', o
 
         if (channelId) messageData.channelId = channelId;
         if (conversationId) messageData.conversationId = conversationId;
+        if (serverId) messageData.serverId = serverId;
 
         try {
             await axios.post(`${API_URL}/api/messages`, messageData);
@@ -87,9 +105,9 @@ export const ChatArea = ({ channelId, conversationId, channelName = 'general', o
     };
 
     return (
-        <div className="flex flex-col h-full bg-[#36393f] flex-1">
+        <div className="flex flex-col h-full bg-black/40 flex-1 backdrop-blur-[2px]">
             {/* Header */}
-            <div className="h-12 border-b border-[#202225] flex items-center px-4 justify-between shadow-sm bg-[#36393f] z-10">
+            <div className="h-12 border-b border-white/5 flex items-center px-4 justify-between shadow-sm bg-black/40 backdrop-blur-md z-10">
                 <div className="flex items-center text-white font-bold">
                     <Hash className="w-5 h-5 text-gray-400 mr-2" />
                     {channelName}
@@ -109,14 +127,14 @@ export const ChatArea = ({ channelId, conversationId, channelName = 'general', o
                         </button>
                     )}
                     <div className="relative hidden md:block">
-                        <input
-                            type="text"
-                            placeholder="Search"
-                            className="bg-[#202225] text-sm px-2 py-1 rounded transition-all w-36 focus:w-60 text-white outline-none"
+                        <SearchBar
+                            serverId={serverId}
+                            onStartDM={onStartDM}
+                            onChannelSelect={onChannelSelect}
                         />
                     </div>
-                    <Inbox className="w-5 h-5 cursor-pointer hover:text-gray-200" />
-                    <HelpCircle className="w-5 h-5 cursor-pointer hover:text-gray-200" />
+                    <Inbox className="w-5 h-5 cursor-pointer hover:text-gray-200 transition-colors" />
+                    <HelpCircle className="w-5 h-5 cursor-pointer hover:text-gray-200 transition-colors" />
                 </div>
             </div>
 
@@ -124,7 +142,7 @@ export const ChatArea = ({ channelId, conversationId, channelName = 'general', o
             <div className="flex-1 overflow-y-auto p-4 space-y-6 custom-scrollbar">
                 {messages.length === 0 && (
                     <div className="text-gray-500 text-center mt-10">
-                        <Hash className="w-12 h-12 mx-auto mb-2 bg-[#2f3136] p-2 rounded-full" />
+                        <Hash className="w-12 h-12 mx-auto mb-2 bg-white/5 p-2 rounded-full" />
                         <p>Welcome to #{channelName}!</p>
                         <p className="text-sm">This is the start of the #{channelName} channel.</p>
                     </div>
@@ -137,8 +155,8 @@ export const ChatArea = ({ channelId, conversationId, channelName = 'general', o
                     return (
                         <div
                             key={i}
-
-                            className={`flex w-full ${isCurrentUser ? 'justify-end' : 'justify-start'}`}
+                            id={msg._id} // ID for scroll target
+                            className={`flex w-full ${isCurrentUser ? 'justify-end' : 'justify-start'} rounded px-2`} // Added padding and rounded for highlight effect
                         >
                             <div
                                 className={`flex max-w-[80%] md:max-w-[70%] gap-3
@@ -149,7 +167,7 @@ export const ChatArea = ({ channelId, conversationId, channelName = 'general', o
                                 <img
                                     src={msg?.senderAvatar}
                                     alt="avatar"
-                                    className="w-10 h-10 rounded-full hover:opacity-80 cursor-pointer flex-shrink-0 mt-1 shadow-sm"
+                                    className="w-10 h-10 rounded-full hover:opacity-80 cursor-pointer flex-shrink-0 mt-1 shadow-sm border border-white/10"
                                     onClick={(e) => {
                                         const rect = e.target.getBoundingClientRect();
                                         // Adjust popover position based on side
@@ -181,8 +199,8 @@ export const ChatArea = ({ channelId, conversationId, channelName = 'general', o
                                     {/* The Bubble */}
                                     <div
                                         className={`px-4 py-2.5 rounded-2xl text-sm md:text-[15px] leading-relaxed whitespace-pre-wrap shadow-md break-words max-w-full ${isCurrentUser
-                                            ? 'bg-[#5865F2] text-white rounded-tr-none'  // Discord Blurple for Me
-                                            : 'bg-[#2f3136] text-gray-100 rounded-tl-none' // Dark Gray for Others
+                                            ? 'bg-[#5865F2] text-white rounded-tr-none shadow-indigo-500/20'  // Discord Blurple for Me
+                                            : 'bg-black/40 border border-white/5 backdrop-blur-sm text-gray-100 rounded-tl-none' // Glass for Others
                                             }`}
                                     >
                                         {msg.content}
@@ -205,7 +223,7 @@ export const ChatArea = ({ channelId, conversationId, channelName = 'general', o
                         onClick={() => setActiveProfile(null)}
                     ></div>
                     <div
-                        className="fixed z-50 bg-[#18191c] rounded-lg shadow-2xl w-72 overflow-hidden border border-[#202225] animate-in fade-in zoom-in-95 duration-100"
+                        className="fixed z-50 bg-[#18191c] rounded-lg shadow-2xl w-72 overflow-hidden border border-white/10 animate-in fade-in zoom-in-95 duration-100"
                         style={{ left: activeProfile.x, top: Math.min(activeProfile.y, window.innerHeight - 300) }}
                     >
                         <div className="h-20 bg-[#5865F2] relative">
@@ -218,7 +236,7 @@ export const ChatArea = ({ channelId, conversationId, channelName = 'general', o
                             <div className="font-bold text-white text-xl">{activeProfile.user.senderName}</div>
                             <div className="text-gray-400 text-sm mb-4">#{activeProfile.user.senderId?.slice(-4)}</div>
 
-                            <div className="border-t border-[#2f3136] my-3"></div>
+                            <div className="border-t border-white/10 my-3"></div>
 
                             <div className="uppercase text-xs font-bold text-gray-400 mb-2">Note</div>
                             <input
@@ -237,9 +255,9 @@ export const ChatArea = ({ channelId, conversationId, channelName = 'general', o
             )}
 
             {/* Input Area */}
-            <div className="p-4 bg-[#36393f] flex-shrink-0">
-                <form onSubmit={handleSendMessage} className="bg-[#40444b] rounded-lg p-2 flex items-center shadow-sm relative">
-                    <button type="button" className="text-gray-400 hover:text-gray-200 mr-3 bg-gray-600 rounded-full p-1 h-6 w-6 flex items-center justify-center shrink-0">
+            <div className="px-3 py-1 bg-transparent flex-shrink-0">
+                <form onSubmit={handleSendMessage} className="bg-black/50 backdrop-blur-sm border border-white/10 rounded-lg p-3 flex items-center shadow-lg relative transition-colors focus-within:border-white/20">
+                    <button type="button" className="text-gray-400 hover:text-gray-200 mr-3 bg-white/10 rounded-full p-1 h-6 w-6 flex items-center justify-center shrink-0 transition-colors">
                         <span className="font-bold text-xs pb-0.5">+</span>
                     </button>
                     <input
@@ -247,7 +265,7 @@ export const ChatArea = ({ channelId, conversationId, channelName = 'general', o
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
                         placeholder={`Message # ${channelName}`}
-                        className="bg-transparent flex-1 text-white outline-none placeholder-gray-500 text-sm md:text-base py-1"
+                        className="bg-transparent flex-1 text-white  outline-none placeholder-gray-500 text-sm md:text-base py-1"
                     />
                     <div className="flex items-center space-x-3 ml-2 text-gray-400 shrink-0">
                         <Send className={`w-5 h-5 cursor-pointer transition-colors ${input.trim() ? 'text-[#5865F2]' : 'hover:text-white'}`} onClick={handleSendMessage} />
