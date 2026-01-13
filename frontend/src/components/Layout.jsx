@@ -30,7 +30,7 @@ export const Layout = () => {
 
     // State for Search Navigation
     const [targetMessageId, setTargetMessageId] = useState(null);
-
+    targetMessageId;
     // Channel State
     const [channels, setChannels] = useState([]);
     const [selectedChannel, setSelectedChannel] = useState(null);
@@ -87,6 +87,7 @@ export const Layout = () => {
             setSelectedChannel(null);
             return;
         }
+        
         axios.get(`${API_URL}/api/servers/${selectedServer._id}/channels`)
             .then(res => {
                 setChannels(res.data);
@@ -167,7 +168,7 @@ export const Layout = () => {
             await axios.delete(`${API_URL}/api/channels/${id}`, { data: { userId: user.id } });
             setChannels(channels.filter(c => c._id !== id));
             if (selectedChannel?._id === id) setSelectedChannel(null);
-        } catch (err) { alert("Error deleting channel"); }
+        } catch (err) { alert("Error deleting channel",err); }
     };
 
     const handleStartDM = async (targetUserId) => {
@@ -187,6 +188,7 @@ export const Layout = () => {
         try {
             // Optimistic update
             const prevConversations = [...conversations];
+            console.log(prevConversations);
             setConversations(conversations.filter(c => c._id !== conversationId));
             if (selectedConversation?._id === conversationId) setSelectedConversation(null);
 
