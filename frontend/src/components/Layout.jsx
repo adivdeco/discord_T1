@@ -281,7 +281,6 @@ const [themeColor, setThemeColor] = useState('#5865F2');
                             }}
                             targetMessageId={targetMessageId}
                             socket={socket}
-                            targetMessageId={targetMessageId}
                         />
                     ) : (
                         <div className="flex-1 flex items-center justify-center text-gray-400">
