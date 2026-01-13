@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Smile } from 'lucide-react';
 import axios from 'axios';
 import { ReactionPicker } from './ReactionPicker';
@@ -19,12 +19,21 @@ export const MessageReactions = ({
   const [showPicker, setShowPicker] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  const fetchReactions = useCallback(async () => {
+    try {
+      const response = await axios.get(`${API_URL}/api/reactions/${messageId}`);
+      setReactions(response.data.reactions || []);
+    } catch (error) {
+      console.error('Error fetching reactions:', error);
+    }
+  }, [messageId]);
+
   // Fetch reactions on mount
   useEffect(() => {
     if (messageId) {
       fetchReactions();
     }
-  }, [messageId]);
+  }, [messageId, fetchReactions]);
 
   // Listen for real-time reaction updates
   useEffect(() => {
@@ -49,16 +58,7 @@ export const MessageReactions = ({
       socket.off('reaction_added', handleReactionAdded);
       socket.off('reaction_removed', handleReactionRemoved);
     };
-  }, [socket, messageId]);
-
-  const fetchReactions = async () => {
-    try {
-      const response = await axios.get(`${API_URL}/api/reactions/${messageId}`);
-      setReactions(response.data.reactions || []);
-    } catch (error) {
-      console.error('Error fetching reactions:', error);
-    }
-  };
+  }, [socket, messageId, fetchReactions]);
 
   const handleAddReaction = async (emoji, emojiName) => {
     try {
