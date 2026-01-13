@@ -16,6 +16,8 @@ export const ChatArea = ({ channelId, conversationId, channelName = 'general', s
     const messagesEndRef = useRef(null);
     const [justJumped, setJustJumped] = useState(false);
 
+
+    //alpha
     // Fetch initial messages
     useEffect(() => {
         if (!channelId && !conversationId) return;
