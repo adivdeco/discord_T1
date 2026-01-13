@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { AlertCircle, CheckCircle, Trash2, MessageSquare, TrendingUp } from 'lucide-react';
 import axios from 'axios';
 
@@ -16,11 +16,7 @@ export default function ModPanel({ serverId, onClose }) {
   const [resolveAction, setResolveAction] = useState('approve');
   const [resolveNotes, setResolveNotes] = useState('');
 
-  useEffect(() => {
-    fetchData();
-  }, [serverId]);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -42,7 +38,11 @@ export default function ModPanel({ serverId, onClose }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [serverId]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const handleResolveMessage = async (messageId) => {
     try {
