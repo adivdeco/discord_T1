@@ -11,6 +11,7 @@ const NotificationScheduler = require('./services/NotificationScheduler');
 const ReminderScheduler = require('./services/ReminderScheduler');
 const notificationRoutes = require('./routes/notificationRoutes');
 const summaryReminderRoutes = require('./routes/summaryReminderRoutes');
+const autoModRoutes = require('./routes/autoModRoutes');
 
 const app = express();
 const server = http.createServer(app);
@@ -85,6 +86,9 @@ app.use('/api/notifications', notificationRoutes);
 
 // -------- Summary & Reminder Routes --------
 app.use('/api/summary-reminder', summaryReminderRoutes);
+
+// -------- AutoMod AI Routes --------
+app.use('/api/automod', autoModRoutes);
 
 // -------- Socket.io Events --------
 io.on('connection', async (socket) => {
