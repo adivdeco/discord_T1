@@ -36,7 +36,10 @@ export const ReactionPicker = ({ messageId, onReactionAdd, onClose, isOpen }) =>
     { emoji: '🍑', name: 'peach', category: 'food' },
     { emoji: '💀', name: 'skull', category: 'emotions' },
     { emoji: '🧠', name: 'brain', category: 'body' },
-    { emoji: '💀', name: 'dead', category: 'emotions' }
+    { emoji: '👻', name: 'ghost', category: 'emotions' },
+    { emoji: '👽', name: 'alien', category: 'emotions' },
+    { emoji: '👾', name: 'invader', category: 'activities' },
+    { emoji: '🤖', name: 'robot', category: 'activities' }
   ];
 
   const filtered = reactionEmojis.filter(r =>
@@ -47,46 +50,61 @@ export const ReactionPicker = ({ messageId, onReactionAdd, onClose, isOpen }) =>
   if (!isOpen) return null;
 
   return (
-    <div className="absolute bottom-full mb-2 left-0 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-50 p-3">
-      <div className="flex items-center justify-between mb-2 pb-2 border-b border-gray-700">
-        <div className="flex items-center gap-2">
-          <Smile size={16} className="text-gray-400" />
-          <span className="text-xs font-semibold text-gray-300">Add Reaction</span>
-        </div>
-        <button
-          onClick={onClose}
-          className="text-gray-400 hover:text-white transition p-0.5"
-        >
-          <X size={14} />
-        </button>
-      </div>
+    <div className="absolute bottom-full mb-3 -left-12 sm:left-0 bg-black/60 backdrop-blur-xl border border-white/10 rounded-2xl shadow-[0_0_50px_-12px_rgba(0,0,0,0.7)] z-50 p-4 w-72 animate-in fade-in zoom-in-95 duration-200 origin-bottom-left ring-1 ring-white/10 overflow-hidden">
+      {/* Decorative gradient background blob */}
+      <div className="absolute -top-10 -right-10 w-32 h-32 bg-purple-500/20 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-blue-500/20 rounded-full blur-3xl pointer-events-none"></div>
 
-      <input
-        type="text"
-        placeholder="Search emojis..."
-        value={searchTerm}
-        onChange={e => setSearchTerm(e.target.value)}
-        className="w-full bg-gray-700 text-white text-xs rounded px-2 py-1 mb-2 placeholder-gray-500 focus:outline-none focus:bg-gray-600"
-      />
-
-      <div className="grid grid-cols-8 gap-1 max-h-48 overflow-y-auto">
-        {filtered.map((reaction, idx) => (
+      <div className="relative">
+        <div className="flex items-center justify-between mb-3 pb-2 border-b border-white/10">
+          <div className="flex items-center gap-2">
+            <div className="p-1 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg shadow-lg shadow-indigo-500/20">
+              <Smile size={14} className="text-white" />
+            </div>
+            <span className="text-sm font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
+              React
+            </span>
+          </div>
           <button
-            key={idx}
-            onClick={() => onReactionAdd(reaction.emoji, reaction.name)}
-            className="text-lg hover:bg-gray-700 p-1 rounded transition cursor-pointer hover:scale-125 transform"
-            title={reaction.name}
+            onClick={onClose}
+            className="text-gray-400 hover:text-white p-1 rounded-full transition-all duration-200"
           >
-            {reaction.emoji}
+            <X size={16} />
           </button>
-        ))}
-      </div>
-
-      {filtered.length === 0 && (
-        <div className="text-xs text-gray-500 text-center py-4">
-          No emojis found
         </div>
-      )}
+
+        <input
+          type="text"
+          autoFocus
+          placeholder="Search reaction..."
+          value={searchTerm}
+          onChange={e => setSearchTerm(e.target.value)}
+          className="w-full bg-black/40 border border-white/10 text-white text-sm rounded-xl px-3 py-2 mb-3 placeholder-gray-500 focus:outline-none focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-500/20 transition-all shadow-inner"
+        />
+
+        <div className="grid grid-cols-7 gap-1 max-h-[200px] overflow-y-auto pr-1 custom-scrollbar">
+          {filtered.map((reaction, idx) => (
+            <button
+              key={idx}
+              onClick={() => onReactionAdd(reaction.emoji, reaction.name)}
+              className="group relative aspect-square flex items-center justify-center rounded-xl hover:bg-white/10 transition-all duration-200 hover:scale-110 active:scale-95"
+              title={reaction.name}
+            >
+              <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/0 to-purple-500/0 group-hover:from-indigo-500/10 group-hover:to-purple-500/10 rounded-xl transition-all duration-300" />
+              <span className="text-xl relative z-10 filter drop-shadow-lg group-hover:drop-shadow-[0_0_10px_rgba(255,255,255,0.3)] transition-all">
+                {reaction.emoji}
+              </span>
+            </button>
+          ))}
+        </div>
+
+        {filtered.length === 0 && (
+          <div className="text-sm text-gray-500 text-center py-6 flex flex-col items-center">
+            <span className="text-2xl mb-2 opacity-50">🤔</span>
+            <span>No mood found</span>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

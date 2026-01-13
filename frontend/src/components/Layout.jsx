@@ -265,6 +265,7 @@ export const Layout = () => {
                                 }
                             }}
                             socket={socket}
+                            targetMessageId={targetMessageId}
                         />
                     ) : (
                         <div className="flex-1 flex items-center justify-center text-gray-400">

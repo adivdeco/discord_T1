@@ -5,10 +5,11 @@ import { useUser } from '@clerk/clerk-react';
 import { FaDiscord } from "react-icons/fa";
 import { SummaryModal } from './SummaryModal';
 import { MessageReactions } from './MessageReactions';
+import SearchBar from './SearchBar';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
-export const ChatArea = ({ channelId, conversationId, channelName = 'general', onStartDM, socket, serverId }) => {
+export const ChatArea = ({ channelId, conversationId, channelName = 'general', onStartDM, socket, serverId, targetMessageId, onChannelSelect }) => {
     const { user } = useUser();
     // Socket is now passed as a prop
     const [messages, setMessages] = useState([]);
