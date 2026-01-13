@@ -5,7 +5,7 @@ import { Smile, X } from 'lucide-react';
  * ReactionPicker Component
  * Shows emoji selector for reacting to messages
  */
-export const ReactionPicker = ({ messageId, onReactionAdd, onClose, isOpen }) => {
+export const ReactionPicker = ({ messageId, onReactionAdd, onClose, isOpen, isCurrentUser }) => {
   const [searchTerm, setSearchTerm] = useState('');
 
   // Popular Discord reactions
@@ -50,7 +50,12 @@ export const ReactionPicker = ({ messageId, onReactionAdd, onClose, isOpen }) =>
   if (!isOpen) return null;
 
   return (
-    <div className="absolute bottom-full mb-3 -left-12 sm:left-0 bg-black/60 backdrop-blur-xl border border-white/10 rounded-2xl shadow-[0_0_50px_-12px_rgba(0,0,0,0.7)] z-50 p-4 w-72 animate-in fade-in zoom-in-95 duration-200 origin-bottom-left ring-1 ring-white/10 overflow-hidden">
+    <div className={`absolute bottom-full mb-3 bg-black/60 backdrop-blur-xl border border-white/10 rounded-2xl shadow-[0_0_50px_-12px_rgba(0,0,0,0.7)] z-50 p-4 w-72 animate-in fade-in zoom-in-95 duration-200 ring-1 ring-white/10 overflow-hidden
+      ${isCurrentUser
+        ? 'origin-bottom-right -right-12 sm:right-0'
+        : 'origin-bottom-left -left-12 sm:left-0'
+      }
+    `}>
       {/* Decorative gradient background blob */}
       <div className="absolute -top-10 -right-10 w-32 h-32 bg-purple-500/20 rounded-full blur-3xl pointer-events-none"></div>
       <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-blue-500/20 rounded-full blur-3xl pointer-events-none"></div>

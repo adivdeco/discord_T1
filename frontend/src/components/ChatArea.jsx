@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { Send, Hash, Bell, Pin, Users, Inbox, HelpCircle, MessageSquare } from 'lucide-react';
+import { Send, Hash, Bell, Pin, Users, Inbox, HelpCircle, MessageSquare, Menu } from 'lucide-react';
 import { useUser } from '@clerk/clerk-react';
 import { FaDiscord } from "react-icons/fa";
 import { SummaryModal } from './SummaryModal';
@@ -9,12 +9,13 @@ import SearchBar from './SearchBar';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
-export const ChatArea = ({ channelId, conversationId, channelName = 'general', onStartDM, socket, serverId, targetMessageId, onChannelSelect }) => {
+export const ChatArea = ({ channelId, conversationId, channelName = 'general', onStartDM, socket, serverId, targetMessageId, onChannelSelect, onMobileMenuToggle }) => {
     const { user } = useUser();
     // Socket is now passed as a prop
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState('');
     const [activeProfile, setActiveProfile] = useState(null);
+    const [activeReactionId, setActiveReactionId] = useState(null); // Track active picker
     const [summaryModalOpen, setSummaryModalOpen] = useState(false);
     const messagesEndRef = useRef(null);
     const [justJumped, setJustJumped] = useState(false);
@@ -113,6 +114,12 @@ export const ChatArea = ({ channelId, conversationId, channelName = 'general', o
             {/* Header */}
             <div className="h-12 border-b border-white/10 flex items-center px-4 justify-between shadow-sm bg-white/5 backdrop-blur-xl z-10">
                 <div className="flex items-center text-white font-bold">
+                    <button
+                        onClick={onMobileMenuToggle}
+                        className="md:hidden mr-3 text-gray-400 hover:text-white"
+                    >
+                        <Menu className="w-6 h-6" />
+                    </button>
                     <Hash className="w-5 h-5 text-gray-400 mr-2" />
                     {channelName}
                 </div>
@@ -203,7 +210,7 @@ export const ChatArea = ({ channelId, conversationId, channelName = 'general', o
                                     {/* The Bubble */}
                                     <div
                                         className={`px-4 py-2.5 rounded-2xl text-sm md:text-[15px] leading-relaxed whitespace-pre-wrap shadow-md break-words max-w-full border border-white/5 ${isCurrentUser
-                                            ? 'bg-[#5865F2] text-white rounded-tr-none shadow-indigo-500/20'  // Discord Blurple for Me
+                                            ? 'bg-[#5865F2]/20 text-white rounded-tr-none shadow-indigo-500/20'  // Discord Blurple for Me
                                             : 'bg-black/40 backdrop-blur-md text-gray-100 rounded-tl-none' // Glass for Others
                                             }`}
                                     >
@@ -217,6 +224,9 @@ export const ChatArea = ({ channelId, conversationId, channelName = 'general', o
                                             userId={user?.id}
                                             userName={user?.firstName || user?.username}
                                             socket={socket}
+                                            activeReactionId={activeReactionId}
+                                            onTogglePicker={() => setActiveReactionId(activeReactionId === msg._id ? null : msg._id)}
+                                            isCurrentUser={isCurrentUser}
                                         />
                                     </div>
 
@@ -237,7 +247,7 @@ export const ChatArea = ({ channelId, conversationId, channelName = 'general', o
                         onClick={() => setActiveProfile(null)}
                     ></div>
                     <div
-                        className="fixed z-50 bg-[#18191c]/90 backdrop-blur-xl rounded-2xl shadow-2xl w-72 overflow-hidden border border-white/10 animate-in fade-in zoom-in-95 duration-100"
+                        className="fixed z-50 bg-[#18191c]/90 backdrop-blur-xl rounded-2xl shadow-2xl w-72 -mt-20 overflow-hidden border border-white/10 animate-in fade-in zoom-in-95 duration-100"
                         style={{ left: activeProfile.x, top: Math.min(activeProfile.y, window.innerHeight - 300) }}
                     >
                         <div className="h-20 bg-[#5865F2] relative">

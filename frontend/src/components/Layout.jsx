@@ -28,6 +28,7 @@ export const Layout = () => {
     // Global State
     const [servers, setServers] = useState([]);
     const [selectedServer, setSelectedServer] = useState(null);
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     // State for Search Navigation
     const [targetMessageId, setTargetMessageId] = useState(null);
@@ -219,48 +220,68 @@ export const Layout = () => {
     return (
         <div className="flex h-screen w-screen overflow-hidden text-sm font-sans bg-black/30 backdrop-blur-sm text-gray-100">
 
-            {/* 1. Navigation Rail (Left) */}
-            <NavigationRail
-                servers={servers}
-                selectedServer={selectedServer}
-                onSelectServer={setSelectedServer}
-                onOpenCreateModal={() => toggleModal('server', true)}
-                onOpenJoinModal={() => toggleModal('join', true)}
-            />
+            <div className={`
+                fixed inset-0 z-50 flex
+                md:static md:z-0
+                transition-transform duration-300 ease-in-out
+                ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+            `}>
+                {/* 1. Navigation Rail (Left) */}
+                <NavigationRail
+                    servers={servers}
+                    selectedServer={selectedServer}
+                    onSelectServer={(s) => {
+                        setSelectedServer(s);
+                        // Don't close menu yet, user needs to pick a channel
+                    }}
+                    onOpenCreateModal={() => toggleModal('server', true)}
+                    onOpenJoinModal={() => toggleModal('join', true)}
+                />
 
-            {/* 2. Sidebar (Middle) - Toggles between Server and DM */}
-            <div className="flex flex-col h-full bg-transparent">
-                {selectedServer ? (
-                    <ServerSidebar
-                        server={selectedServer}
-                        channels={channels}
-                        selectedChannel={selectedChannel}
-                        onSelectChannel={(channel) => {
-                            setSelectedChannel(channel);
-                            setTargetMessageId(null);
-                        }}
-                        user={user}
-                        isOwner={isOwner}
-                        onOpenInvite={() => toggleModal('invite', true)}
-                        onOpenSettings={() => toggleModal('settings', true)}
-                        onOpenCreateChannel={() => toggleModal('channel', true)}
-                        onDeleteServer={handleDeleteServer}
-                        onLeaveServer={handleLeaveServer}
-                        onDeleteChannel={handleDeleteChannel}
-                    />
-                ) : (
-                    <DMSidebar
-                        conversations={conversations}
-                        selectedConversation={selectedConversation}
-                        onSelect={setSelectedConversation}
-                        onOpenDMModal={() => toggleModal('dm', true)}
-                        currentUser={user}
-                        onDelete={handleDeleteConversation}
-                    />
-                )}
+                {/* 2. Sidebar (Middle) */}
+                <div className="flex flex-col h-full bg-black/90 md:bg-transparent  shadow-2xl md:shadow-none">
+                    {selectedServer ? (
+                        <ServerSidebar
+                            server={selectedServer}
+                            channels={channels}
+                            selectedChannel={selectedChannel}
+                            onSelectChannel={(channel) => {
+                                setSelectedChannel(channel);
+                                setTargetMessageId(null);
+                                setMobileMenuOpen(false); // Close on selection
+                            }}
+                            user={user}
+                            isOwner={isOwner}
+                            onOpenInvite={() => toggleModal('invite', true)}
+                            onOpenSettings={() => toggleModal('settings', true)}
+                            onOpenCreateChannel={() => toggleModal('channel', true)}
+                            onDeleteServer={handleDeleteServer}
+                            onLeaveServer={handleLeaveServer}
+                            onDeleteChannel={handleDeleteChannel}
+                        />
+                    ) : (
+                        <DMSidebar
+                            conversations={conversations}
+                            selectedConversation={selectedConversation}
+                            onSelect={(c) => {
+                                setSelectedConversation(c);
+                                setMobileMenuOpen(false); // Close on selection
+                            }}
+                            onOpenDMModal={() => toggleModal('dm', true)}
+                            currentUser={user}
+                            onDelete={handleDeleteConversation}
+                        />
+                    )}
 
-                {/* User Panel (Bottom) */}
-                <UserPanel user={user} onOpenSettings={() => toggleModal('userSettings', true)} />
+                    {/* User Panel (Bottom) */}
+                    <UserPanel user={user} onOpenSettings={() => toggleModal('userSettings', true)} />
+                </div>
+
+                {/* Backdrop for mobile to close menu */}
+                <div
+                    className={`md:hidden flex-1 select-none cursor-pointer ${mobileMenuOpen ? 'block' : 'hidden'}`}
+                    onClick={() => setMobileMenuOpen(false)}
+                />
             </div>
 
             {/* 3. Main Chat Area (Right) */}
@@ -281,6 +302,7 @@ export const Layout = () => {
                             }}
                             targetMessageId={targetMessageId}
                             socket={socket}
+                            onMobileMenuToggle={() => setMobileMenuOpen(!mobileMenuOpen)}
                         />
                     ) : (
                         <div className="flex-1 flex items-center justify-center text-gray-400">
@@ -299,6 +321,7 @@ export const Layout = () => {
                             })()}
                             onStartDM={handleStartDM}
                             socket={socket}
+                            onMobileMenuToggle={() => setMobileMenuOpen(!mobileMenuOpen)}
                         />
                     ) : (
                         <div className="flex-1 flex items-center justify-center text-gray-400">
