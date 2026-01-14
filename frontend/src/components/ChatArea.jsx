@@ -152,10 +152,50 @@ export const ChatArea = ({ channelId, conversationId, channelName = 'general', o
             {/* Messages Area */}
             <div className="flex-1 overflow-y-auto p-4 space-y-6 custom-scrollbar">
                 {messages.length === 0 && (
-                    <div className="text-gray-500 text-center mt-10">
-                        <Hash className="w-12 h-12 mx-auto mb-2 bg-white/5 p-2 rounded-full" />
-                        <p>Welcome to #{channelName}!</p>
-                        <p className="text-sm">This is the start of the #{channelName} channel.</p>
+                    <div className="flex flex-col items-center justify-center mt-10 space-y-4 animate-fade-in-up">
+                        <div className="relative w-64 h-64">
+                            {/* Decorative Elements */}
+                            <img 
+                                src="/coindis.webp" 
+                                className="absolute top-[1vw] -right-[30vw] w-[12vw] h-[12vw] animate-spin-slow opacity-30" 
+                                alt="floating coin"
+                            />
+                            <img 
+                                src="/tadyleaf.webp" 
+                                className="absolute bottom-[7vw]  w-[28vw] h-[8vw] delay-75 animate-wiggle opacity-90" 
+                                style={{ animationDelay: '1s' }}
+                                alt="floating leaf"
+                            />
+                            <img 
+                                src="/disegg.webp" 
+                                className="absolute top-4 -left-[30vw] w-[14vw] h-[14vw] animate-float opacity-60 " 
+                                style={{ animationDelay: '2s' }}
+                                alt="floating egg"
+                            />
+
+                            {/* Main Characters */}
+                            <div className="absolute top-[17.4vw] z-20 inset-0 flex items-center justify-center">
+                                <img 
+                                    src="/taddy.webp" 
+                                    className="w-60 h-60 object-contain z-10" 
+                                    alt="Taddy"
+                                />
+                                {/* <img 
+                                    src="/botbody.webp" 
+                                    className="absolute -right-8 bottom-0 w-24 h-24 object-contain animate-wiggle z-20" 
+                                    style={{ animationDelay: '0.5s' }}
+                                    alt="Bot Body"
+                                /> */}
+                            </div>
+                        </div>
+
+                        <div className="text-center z-10">
+                            <h3 className="text-5xl font-bold text-white mb-2">Welcome to #{channelName}!</h3>
+                            <p className="text-gray-400 text-sm ">
+                                This is the start of the <span className="font-semibold text-gray-300">#{channelName}</span> channel.
+                                Say hello to your new friends!
+                            </p>
+                        </div>
                     </div>
                 )}
 
