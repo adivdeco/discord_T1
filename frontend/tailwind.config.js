@@ -23,7 +23,8 @@ export default {
                 }
             },
             fontFamily: {
-                sans: ['Inter', 'sans-serif'], // Ensure a clean sans-serif is used
+                sans: ['Inter', 'sans-serif'],
+                Gamer: ['Gamer', 'sans-serif'],
             }
         },
     },
