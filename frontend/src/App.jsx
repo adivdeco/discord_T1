@@ -4,8 +4,8 @@ import Carlo from "./components/landing/Carlo";
 function App() {
   return (
     <>
-      <Carlo />
-      <LandingPage/>
+      {/* <Carlo /> */}
+      <LandingPage />
     </>
   );
 }
